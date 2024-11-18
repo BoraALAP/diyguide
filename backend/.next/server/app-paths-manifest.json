@@ -1,5 +1,6 @@
 {
-  "/page": "app/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/api/generate-guide/route": "app/api/generate-guide/route.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/generate-guide/route": "app/api/generate-guide/route.js",
+  "/page": "app/page.js"
 }

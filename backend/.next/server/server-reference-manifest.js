@@ -1,1 +1,1 @@
-self.__RSC_SERVER_MANIFEST="{\n  \"node\": {},\n  \"edge\": {},\n  \"encryptionKey\": \"OG5+J5gT2ha/UV5XQJkwJYpLkLDtvBmzRaL5NoMPrkw=\"\n}"
+self.__RSC_SERVER_MANIFEST="{\"node\":{\"40b2263bdfc31534f96126ceb8bb7fa45f94af7411\":{\"workers\":{\"app/api/generate-guide/route\":{\"moduleId\":\"8721\",\"async\":false}},\"layer\":{\"app/api/generate-guide/route\":\"rsc\"}}},\"edge\":{},\"encryptionKey\":\"process.env.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY\"}"

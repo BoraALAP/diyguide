@@ -29,8 +29,12 @@ const GuideSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  console.log("testing");
-  console.log(req.body);
+  // Verify API key for endpoint security
+  const apiKey = req.headers.get("x-api-key");
+
+  if (!apiKey || apiKey !== process.env.API_AUTH_KEY) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
 
   const { query } = await req.json();
 

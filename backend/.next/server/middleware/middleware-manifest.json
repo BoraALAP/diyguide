@@ -1,0 +1,56 @@
+{
+  "sorted_middleware": [],
+  "middleware": {
+    "/": {
+      "files": [
+        "server/edge/chunks/_139c62._.js",
+        "server/edge/chunks/[root of the server]__e72251._.js",
+        "server/edge/chunks/edge-wrapper_ba127f.js"
+      ],
+      "name": "middleware",
+      "page": "/",
+      "matchers": [
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*){(\\\\.json)}?",
+          "originalSource": "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"
+        }
+      ],
+      "wasm": [],
+      "assets": [
+        {
+          "name": "server/edge/chunks/_139c62._.js.map",
+          "filePath": "server/edge/chunks/_139c62._.js.map"
+        },
+        {
+          "name": "server/edge/chunks/_139c62._.js",
+          "filePath": "server/edge/chunks/_139c62._.js"
+        },
+        {
+          "name": "server/edge/chunks/[root of the server]__e72251._.js.map",
+          "filePath": "server/edge/chunks/[root of the server]__e72251._.js.map"
+        },
+        {
+          "name": "server/edge/chunks/[root of the server]__e72251._.js",
+          "filePath": "server/edge/chunks/[root of the server]__e72251._.js"
+        },
+        {
+          "name": "server/edge/chunks/edge-wrapper_ba127f.js.map",
+          "filePath": "server/edge/chunks/edge-wrapper_ba127f.js.map"
+        },
+        {
+          "name": "server/edge/chunks/edge-wrapper_ba127f.js",
+          "filePath": "server/edge/chunks/edge-wrapper_ba127f.js"
+        }
+      ],
+      "env": {
+        "__NEXT_BUILD_ID": "development",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "OG5+J5gT2ha/UV5XQJkwJYpLkLDtvBmzRaL5NoMPrkw=",
+        "__NEXT_PREVIEW_MODE_ID": "204ef74ab2f0c42d36f183ac11e25598",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "5ede29a9dae80a6cfbea37c3d7a466b9e742323127a35fdbbf9561e799460199",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "4093f55f1809577e5955f988e4734c53398c747d4fd46aff1d962a68b024ef9d"
+      }
+    }
+  },
+  "instrumentation": null,
+  "functions": {}
+}

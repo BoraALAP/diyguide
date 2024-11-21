@@ -1,1 +1,5 @@
-{"node":{"40b2263bdfc31534f96126ceb8bb7fa45f94af7411":{"workers":{"app/api/generate-guide/route":{"moduleId":"8721","async":false}},"layer":{"app/api/generate-guide/route":"rsc"}}},"edge":{},"encryptionKey":"OG5+J5gT2ha/UV5XQJkwJYpLkLDtvBmzRaL5NoMPrkw="}
+{
+  "node": {},
+  "edge": {},
+  "encryptionKey": "OG5+J5gT2ha/UV5XQJkwJYpLkLDtvBmzRaL5NoMPrkw="
+}

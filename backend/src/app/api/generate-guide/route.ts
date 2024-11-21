@@ -25,10 +25,15 @@ const GuideSchema = z.object({
   title: z.string(),
   content: z.string(),
   steps: z.array(StepSchema),
+  tools: z.array(z.string()),
+  materials: z.array(z.string()),
   tags: z.array(z.string()),
+  tips: z.array(z.string()),
 });
 
 export async function POST(req: NextRequest) {
+  console.log("generating guide");
+
   // Verify API key for endpoint security
   const apiKey = req.headers.get("x-api-key");
 
@@ -38,45 +43,91 @@ export async function POST(req: NextRequest) {
 
   const { query } = await req.json();
 
-  console.log(query);
-
   try {
     const supabase = await createClient();
+
+    const { data: existingTags, error: fetchError } = await supabase
+      .from("tags")
+      .select("id, name");
+
+    if (fetchError) throw new Error("Error fetching existing tags");
+
+    const existingTagMap = Object.fromEntries(
+      existingTags.map((tag) => [tag.name, tag.id]),
+    );
 
     const aiResponse = await openai.beta.chat.completions.parse({
       model: "gpt-4o-2024-08-06",
       messages: [{
         role: "system",
         content:
-          "You are a specialist on writing a do it your self guides. You are given a topic and you need to write a detailed guide for it. You need to provide steps and tips. also generate a list of materials and tools needed. additionally, give tags for the guide.",
+          `You are a specialist on writing a do it your self guides. You are given a topic and you need to write a detailed guide for it. You need to provide steps and tips. Include a list of materials and tools needed with their measurements for each step and for the whole guide. additionally, give tags for the guide, please avoid tags like diy and please put space between words. Include tags for the guide. Use existing tags where applicable: ${
+            Object.keys(existingTagMap).join(", ")
+          }.`,
       }, {
         role: "user",
         content: query,
       }],
       response_format: zodResponseFormat(GuideSchema, "guide"),
-      max_tokens: 500,
+      max_tokens: 2000,
     });
 
     const content = aiResponse.choices[0].message.parsed;
 
-    console.log(content);
     if (!content) throw new Error("No content");
-    const { data, error } = await supabase
+    const newTags = content.tags.filter((tag) => !existingTagMap[tag]);
+
+    if (newTags.length > 0) {
+      const { data: insertedTags, error: insertError } = await supabase
+        .from("tags")
+        .insert(newTags.map((name) => ({ name })))
+        .select("id, name");
+
+      if (insertError) throw new Error("Error inserting new tags");
+
+      // Add new tags to the existingTagMap
+      insertedTags.forEach((tag) => {
+        existingTagMap[tag.name] = tag.id;
+      });
+    }
+
+    const { data: guideData, error: guideError } = await supabase
       .from("guides")
       .insert([{
         title: content.title,
         content: content.content,
         steps: content.steps,
+        tools: content.tools,
+        materials: content.materials,
         created_by: "AI",
-        tags: content.tags,
+        tips: content.tips,
       }])
-      .select("id, title");
+      .select("id, title, content, steps, tips")
+      .single();
 
-    console.log(data);
+    if (guideError) {
+      console.log(guideError);
 
-    if (error) throw error;
+      throw new Error("Error inserting guide");
+    }
 
-    return NextResponse.json(query);
+    const guideId = guideData.id;
+
+    // Step 5: Link tags to the guide in the `guide_tags` table
+    const guideTags = content.tags.map((tag) => ({
+      guide_id: guideId,
+      tag_id: existingTagMap[tag],
+    }));
+
+    console.log(guideTags);
+
+    const { error: linkError } = await supabase
+      .from("guide_tags")
+      .insert(guideTags);
+
+    if (linkError) throw new Error("Error linking tags to guide");
+
+    return NextResponse.json({ data: guideData, error: null });
   } catch (error) {
     console.error("Error:", error);
     return NextResponse.json(

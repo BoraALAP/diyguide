@@ -1,0 +1,56 @@
+{
+  "sorted_middleware": [],
+  "middleware": {
+    "/": {
+      "files": [
+        "server/edge/chunks/_139c62._.js",
+        "server/edge/chunks/[root of the server]__e72251._.js",
+        "server/edge/chunks/edge-wrapper_ba127f.js"
+      ],
+      "name": "middleware",
+      "page": "/",
+      "matchers": [
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*){(\\\\.json)}?",
+          "originalSource": "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"
+        }
+      ],
+      "wasm": [],
+      "assets": [
+        {
+          "name": "server/edge/chunks/_139c62._.js.map",
+          "filePath": "server/edge/chunks/_139c62._.js.map"
+        },
+        {
+          "name": "server/edge/chunks/_139c62._.js",
+          "filePath": "server/edge/chunks/_139c62._.js"
+        },
+        {
+          "name": "server/edge/chunks/[root of the server]__e72251._.js.map",
+          "filePath": "server/edge/chunks/[root of the server]__e72251._.js.map"
+        },
+        {
+          "name": "server/edge/chunks/[root of the server]__e72251._.js",
+          "filePath": "server/edge/chunks/[root of the server]__e72251._.js"
+        },
+        {
+          "name": "server/edge/chunks/edge-wrapper_ba127f.js.map",
+          "filePath": "server/edge/chunks/edge-wrapper_ba127f.js.map"
+        },
+        {
+          "name": "server/edge/chunks/edge-wrapper_ba127f.js",
+          "filePath": "server/edge/chunks/edge-wrapper_ba127f.js"
+        }
+      ],
+      "env": {
+        "__NEXT_BUILD_ID": "development",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "OG5+J5gT2ha/UV5XQJkwJYpLkLDtvBmzRaL5NoMPrkw=",
+        "__NEXT_PREVIEW_MODE_ID": "0303c2d54fb9c9cdce184605e00c0bb5",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "944cfaf48d019fa4854ed56361f4c0eaf16ef19db457652fcd8cbd4201d7e58c",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "b6e89569de35933818dfe804c6a5849e0b59d5e718fd52ce18898d2cabaad1bf"
+      }
+    }
+  },
+  "instrumentation": null,
+  "functions": {}
+}

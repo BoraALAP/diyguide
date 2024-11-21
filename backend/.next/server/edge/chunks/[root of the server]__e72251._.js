@@ -49,7 +49,7 @@ async function updateSession(request) {
         }
     });
     // refreshing the auth token
-    // await supabase.auth.getUser();
+    await supabase.auth.getUser();
     return supabaseResponse;
 }
 }}),

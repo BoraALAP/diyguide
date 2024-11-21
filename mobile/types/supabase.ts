@@ -69,30 +69,93 @@ export type Database = {
           },
         ]
       }
+      guide_tags: {
+        Row: {
+          created_at: string
+          guide_id: string | null
+          id: string
+          tag_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          guide_id?: string | null
+          id?: string
+          tag_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          guide_id?: string | null
+          id?: string
+          tag_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guide_tags_guide_id_fkey"
+            columns: ["guide_id"]
+            isOneToOne: false
+            referencedRelation: "guides"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guide_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guides: {
         Row: {
           content: string
           created_at: string | null
           created_by: string | null
           id: string
-          tags: string[] | null
+          materials: string[] | null
+          steps: Json[] | null
+          tips: string[] | null
           title: string
+          tools: string[] | null
         }
         Insert: {
           content: string
           created_at?: string | null
           created_by?: string | null
-          id: string
-          tags?: string[] | null
+          id?: string
+          materials?: string[] | null
+          steps?: Json[] | null
+          tips?: string[] | null
           title: string
+          tools?: string[] | null
         }
         Update: {
           content?: string
           created_at?: string | null
           created_by?: string | null
           id?: string
-          tags?: string[] | null
+          materials?: string[] | null
+          steps?: Json[] | null
+          tips?: string[] | null
           title?: string
+          tools?: string[] | null
+        }
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
         }
         Relationships: []
       }

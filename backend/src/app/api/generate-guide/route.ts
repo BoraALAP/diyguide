@@ -38,7 +38,10 @@ export async function POST(req: NextRequest) {
   const apiKey = req.headers.get("x-api-key");
 
   if (!apiKey || apiKey !== process.env.API_AUTH_KEY) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    console.log(apiKey, process.env.API_AUTH_KEY);
+    return NextResponse.json({
+      message: `Unauthorized, ${apiKey}, ${process.env.API_AUTH_KEY}`,
+    }, { status: 401 });
   }
 
   const { query } = await req.json();

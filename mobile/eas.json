@@ -5,20 +5,20 @@
   "build": {
     "simulator": {
       "developmentClient": true,
+      "distribution": "internal",
       "ios": {
-        "simulator": true,
-        "buildConfiguration": "Debug"
+        "simulator": true
+      },
+      "env": {
+        "APP_ENV": "development"
       }
     },
     "development": {
       "distribution": "internal",
       "developmentClient": true,
       "channel": "development",
-      "android": {
-        "gradleCommand": ":app:assembleDebug"
-      },
-      "ios": {
-        "buildConfiguration": "Debug"
+      "env": {
+        "APP_ENV": "development"
       }
     },
     "preview": {
@@ -26,23 +26,30 @@
       "extends": "production",
       "channel": "preview",
       "env": {
+        "APP_ENV": "preview",
         "EXPO_PUBLIC_SUPABASE_URL": "https://vixtnqangkibmfnhpily.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpeHRucWFuZ2tpYm1mbmhwaWx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE4MjI3NjcsImV4cCI6MjA0NzM5ODc2N30.XO2dfua_AcZ_CSDACjuiPLvZ8nNVYoMFxIDlcH_YQ0M",
         "EXPO_PUBLIC_API_AUTH_KEY": "8f47e8c1-9b4a-4f8d-b7d5-e89c3f6d2a4e",
-        "EXPO_PUBLIC_BACKEND_URL": "https://diyguide.vercel.app"
+        "EXPO_PUBLIC_BACKEND_URL": "https://diyguide.vercel.app",
+        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR",
+        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_VQnUwsKGzAewRCjpkRWneyLeJTJ"
       }
     },
     "production": {
       "channel": "production",
       "env": {
+        "APP_ENV": "production",
         "EXPO_PUBLIC_SUPABASE_URL": "https://vixtnqangkibmfnhpily.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpeHRucWFuZ2tpYm1mbmhwaWx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE4MjI3NjcsImV4cCI6MjA0NzM5ODc2N30.XO2dfua_AcZ_CSDACjuiPLvZ8nNVYoMFxIDlcH_YQ0M",
         "EXPO_PUBLIC_API_AUTH_KEY": "8f47e8c1-9b4a-4f8d-b7d5-e89c3f6d2a4e",
-        "EXPO_PUBLIC_BACKEND_URL": "https://diyguide.vercel.app"
+        "EXPO_PUBLIC_BACKEND_URL": "https://diyguide.vercel.app",
+        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR",
+        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_VQnUwsKGzAewRCjpkRWneyLeJTJ"
       }
     }
   },
   "submit": {
-    "production": {}
+    "production": {},
+    "simulator": {}
   }
 }

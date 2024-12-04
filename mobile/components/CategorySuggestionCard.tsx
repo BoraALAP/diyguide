@@ -1,68 +1,29 @@
 import { Link } from "expo-router";
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Pressable,
-} from "react-native";
+import { StyleSheet, Pressable } from "react-native";
+import { SecondaryText, Text, useCardStyles } from "./Themed";
 
 const CategorySuggestionCard = ({ guide }: { guide: any }) => {
+  const cardStyles = useCardStyles();
   return (
     <Link
-      style={styles.card}
       href={{
         pathname: "/[guide]/guide",
         params: { guide: guide.id, title: guide.title },
       }}
       asChild
     >
-      <Pressable>
+      <Pressable style={{ ...styles.card, ...cardStyles.card }}>
         <Text style={styles.title}>{guide.title}</Text>
-        <View style={styles.tagWrapper}>
-          <Text style={styles.step}>{guide.steps.length} steps</Text>
-          {/* {guide.tags.map((tag: string) => {
-            return (
-              <Text style={styles.tag} key={tag}>
-                {tag}
-              </Text>
-            );
-          })} */}
-        </View>
+        <SecondaryText>{guide.steps.length} steps</SecondaryText>
       </Pressable>
     </Link>
   );
 };
 
 const styles = StyleSheet.create({
-  card: {
-    padding: 16,
-    borderWidth: 0.5,
-    borderColor: "#e0e0e0",
-    width: 180,
-  },
-  title: { fontWeight: "bold", marginBottom: 5, flex: 1, width: "100%" },
-  tagWrapper: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "flex-start",
-    gap: 4,
-    marginTop: 6,
-  },
-  tag: {
-    fontSize: 12,
-    backgroundColor: "white",
-    borderRadius: 24,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    textTransform: "capitalize",
-    color: "#303030",
-  },
-  step: {
-    fontSize: 12,
-    color: "#303030",
-  },
+  card: { maxWidth: 200 },
+  title: { fontWeight: "bold", marginBottom: 5 },
 });
 
 export default CategorySuggestionCard;

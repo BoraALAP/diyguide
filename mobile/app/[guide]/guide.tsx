@@ -1,19 +1,112 @@
 import React, { Suspense, useState, useEffect } from "react";
 import {
   View,
-  Text,
-  ScrollView,
   StyleSheet,
   ActivityIndicator,
+  useColorScheme,
 } from "react-native";
-import { Stack, useLocalSearchParams } from "expo-router";
-import { supabase } from "@/utils/supabaseClient";
+import { useLocalSearchParams } from "expo-router";
+import { supabase } from "@/lib/supabaseClient";
+import {
+  PageTitle,
+  ScrollView,
+  SecondaryText,
+  Text,
+} from "@/components/Themed";
+import Colors from "@/constants/Colors";
+
+const getThemedStyles = (colorScheme: "light" | "dark" | null) => {
+  return StyleSheet.create({
+    content: {
+      rowGap: 16,
+      paddingBottom: 60,
+    },
+    header: {
+      rowGap: 8,
+      padding: 24,
+      paddingTop: 120,
+      backgroundColor: Colors[colorScheme ?? "light"].cardBackground,
+    },
+    materials: {
+      rowGap: 8,
+      padding: 24,
+      backgroundColor: Colors[colorScheme ?? "light"].cardBackground,
+    },
+    tools: {
+      rowGap: 8,
+      padding: 24,
+      backgroundColor: Colors[colorScheme ?? "light"].cardBackground,
+    },
+    stepMaterials: {
+      rowGap: 8,
+      padding: 12,
+      backgroundColor: Colors[colorScheme ?? "light"].cardBackground,
+    },
+    stepTools: {
+      rowGap: 8,
+      padding: 12,
+      backgroundColor: Colors[colorScheme ?? "light"].cardBackground,
+    },
+    tips: {
+      rowGap: 8,
+      marginHorizontal: 24,
+      backgroundColor: Colors[colorScheme ?? "light"].cardBackground,
+      padding: 24,
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: "bold",
+    },
+    description: {
+      fontSize: 16,
+    },
+    subTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    text: {
+      fontSize: 16,
+    },
+
+    steptitle: {
+      fontSize: 16,
+      fontWeight: "bold",
+
+      flex: 1,
+    },
+    steps: {
+      rowGap: 16,
+      marginHorizontal: 24,
+    },
+    step: {
+      rowGap: 8,
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 8,
+    },
+    stepContainer: {
+      rowGap: 8,
+
+      paddingBottom: 16,
+    },
+    stepsSubTitle: {
+      fontSize: 12,
+      fontWeight: "bold",
+    },
+    stepNumber: {
+      fontSize: 14,
+      marginTop: 1,
+      fontWeight: "bold",
+    },
+  });
+};
 
 const page = () => {
   const { guide } = useLocalSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<any>(null);
   const [info, setInfo] = useState<any>(null);
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
     const func = async () => {
@@ -33,31 +126,22 @@ const page = () => {
 
   console.log(info);
 
+  const styles = getThemedStyles(colorScheme ?? "light");
+
   return (
     <Suspense fallback={<ActivityIndicator />}>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
-      >
+      <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>{info?.title}</Text>
-          <Text style={styles.description}>{info?.content}</Text>
+          <PageTitle>{info?.title}</PageTitle>
+          <Text>{info?.content}</Text>
         </View>
-        <View>
-          {/* {info?.tags !== null &&
-            info?.tags.map((tag: string) => {
-              return <Text key={tag}>{tag}</Text>;
-            })} */}
-        </View>
+        <View></View>
+
         {info?.materials !== null && (
           <View style={styles.materials}>
             <Text style={styles.subTitle}>Materials</Text>
             {info?.materials.map((material: string) => {
-              return (
-                <Text style={styles.smalltext} key={material}>
-                  {material}
-                </Text>
-              );
+              return <SecondaryText key={material}>{material}</SecondaryText>;
             })}
           </View>
         )}
@@ -65,11 +149,7 @@ const page = () => {
           <View style={styles.tools}>
             <Text style={styles.subTitle}>Tools</Text>
             {info?.tools.map((tool: string) => {
-              return (
-                <Text style={styles.smalltext} key={tool}>
-                  {tool}
-                </Text>
-              );
+              return <SecondaryText key={tool}>{tool}</SecondaryText>;
             })}
           </View>
         )}
@@ -87,9 +167,7 @@ const page = () => {
                     <Text style={styles.stepsSubTitle}>Materials</Text>
                     {step.materials.map((material: string) => {
                       return (
-                        <Text style={styles.smalltext} key={material}>
-                          {material}
-                        </Text>
+                        <SecondaryText key={material}>{material}</SecondaryText>
                       );
                     })}
                   </View>
@@ -98,11 +176,7 @@ const page = () => {
                   <View style={styles.stepTools}>
                     <Text style={styles.stepsSubTitle}>Tools</Text>
                     {step.tools.map((tool: string) => {
-                      return (
-                        <Text style={styles.smalltext} key={tool}>
-                          {tool}
-                        </Text>
-                      );
+                      return <SecondaryText key={tool}>{tool}</SecondaryText>;
                     })}
                   </View>
                 )}
@@ -114,11 +188,7 @@ const page = () => {
           <View style={styles.tips}>
             <Text style={styles.subTitle}>Tips</Text>
             {info?.tips?.map((tip: string) => {
-              return (
-                <Text style={styles.smalltext} key={tip}>
-                  {tip}
-                </Text>
-              );
+              return <SecondaryText key={tip}>{tip}</SecondaryText>;
             })}
           </View>
         )}
@@ -128,95 +198,3 @@ const page = () => {
 };
 
 export default page;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    rowGap: 16,
-    paddingBottom: 60,
-  },
-  header: {
-    rowGap: 8,
-    padding: 24,
-    backgroundColor: "#f2f2f2",
-    paddingTop: 120,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  description: {
-    fontSize: 16,
-  },
-  subTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  materials: {
-    rowGap: 8,
-    padding: 24,
-    backgroundColor: "#f8f8f8",
-  },
-  tools: {
-    rowGap: 8,
-    padding: 24,
-    backgroundColor: "#f8f8f8",
-  },
-  text: {
-    fontSize: 16,
-  },
-  smalltext: {
-    fontSize: 14,
-    color: "#3b3b3b",
-  },
-  steptitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#434343",
-    flex: 1,
-  },
-  steps: {
-    rowGap: 16,
-    marginHorizontal: 24,
-  },
-  step: {
-    rowGap: 8,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
-  },
-  stepContainer: {
-    rowGap: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#cacaca",
-    paddingBottom: 16,
-  },
-  stepMaterials: {
-    rowGap: 8,
-    padding: 12,
-    backgroundColor: "#f4f4f4",
-  },
-  stepTools: {
-    rowGap: 8,
-    padding: 12,
-    backgroundColor: "#f4f4f4",
-  },
-  stepsSubTitle: {
-    fontSize: 12,
-    fontWeight: "bold",
-  },
-  stepNumber: {
-    fontSize: 14,
-    marginTop: 1,
-    fontWeight: "bold",
-  },
-  tips: {
-    rowGap: 8,
-    marginHorizontal: 24,
-    backgroundColor: "#f6f6f6",
-
-    padding: 24,
-  },
-});

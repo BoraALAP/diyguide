@@ -9,9 +9,11 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
+import "../global.css";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
+import RevenueProvider from "@/utils/RevenueProvider";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -55,35 +57,39 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen
-          name="(tabs)"
-          options={{
-            headerShown: false,
+      <RevenueProvider>
+        <Stack screenOptions={{ headerBackButtonMenuEnabled: true }}>
+          <Stack.Screen
+            name="(tabs)"
+            options={{
+              headerShown: false,
+              title: "",
+              contentStyle: {
+                backgroundColor: Colors[colorScheme ?? "light"].background,
+              },
+            }}
+          />
+          <Stack.Screen
+            name="[guide]"
+            options={({ route }) => ({
+              title: (route.params as { title?: string })?.title || "Guide",
+              headerShadowVisible: false,
+              headerTransparent: true,
+              headerBlurEffect: "systemUltraThinMaterialLight",
 
-            contentStyle: {
-              backgroundColor: Colors[colorScheme ?? "light"].background,
-            },
-          }}
-        />
-        <Stack.Screen
-          name="[guide]"
-          options={({ route }) => ({
-            title: (route.params as { title?: string })?.title || "Guide",
-            headerShadowVisible: false,
-            headerTransparent: true,
-            headerBlurEffect: "systemUltraThinMaterialLight",
-            headerStyle: {
-              backgroundColor: "rgba(240, 240, 240, 0.15)",
-            },
-            contentStyle: {
-              backgroundColor: Colors[colorScheme ?? "light"].background,
-            },
-          })}
-        />
+              headerStyle: {
+                backgroundColor:
+                  Colors[colorScheme ?? "light"].headerBackground,
+              },
+              contentStyle: {
+                backgroundColor: Colors[colorScheme ?? "light"].background,
+              },
+            })}
+          />
 
-        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-      </Stack>
+          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+        </Stack>
+      </RevenueProvider>
     </ThemeProvider>
   );
 }

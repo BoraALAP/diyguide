@@ -1,20 +1,16 @@
-import { supabase } from "../../../utils/supabaseClient";
+import { supabase } from "../../../lib/supabaseClient";
 import {
   ActivityIndicator,
   FlatList,
   ScrollView,
   StyleSheet,
-  Dimensions,
 } from "react-native";
 
-import EditScreenInfo from "@/components/EditScreenInfo";
-import { Text, View } from "@/components/Themed";
-import { Guides, GuideTags } from "@/types/custom";
 import { useEffect, useState } from "react";
 import { Tags } from "@/types/custom";
-import SuggestionCard from "@/components/SuggestionCard";
 import { Json } from "@/types/supabase";
 import CategorySuggestionCard from "@/components/CategorySuggestionCard";
+import { PageTitle, SecondaryText, Text, View } from "@/components/Themed";
 
 type TagsType = Tags & {
   guide_tags: GuideTagsWithGuides[];
@@ -63,7 +59,11 @@ export default function CategoriesScreen() {
         setError(error);
       }
       if (data) {
-        setTags(data as unknown as TagsType[]);
+        setTags(
+          (data as unknown as TagsType[]).sort((a, b) =>
+            a.name.localeCompare(b.name)
+          )
+        );
       }
       setLoading(false);
     };
@@ -83,11 +83,13 @@ export default function CategoriesScreen() {
         </View>
       ) : (
         <View style={styles.container}>
-          <Text style={styles.title}>Search results</Text>
+          <PageTitle style={styles.title}>Categories</PageTitle>
           {tags.map((tag: TagsType) => {
             return (
               <View key={tag.id} style={styles.tagContainer}>
-                <Text style={styles.tagTitle}>{tag.name}</Text>
+                <SecondaryText style={styles.tagTitle}>
+                  {tag.name}
+                </SecondaryText>
                 <FlatList
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -111,22 +113,20 @@ const styles = StyleSheet.create({
   loading: { flex: 1, justifyContent: "center", alignItems: "center" },
   pageContainer: { gap: 16 },
   content: { paddingTop: 88 },
-  flatlistContent: { gap: 12 },
-  tagContainer: { gap: 12 },
-  title: {
-    paddingHorizontal: 24,
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#303030",
-  },
+
+  flatlistContent: { marginTop: 8, marginBottom: 4, paddingHorizontal: 8 },
+  tagContainer: { gap: 4 },
+
   container: {
     gap: 24,
+  },
+  title: {
+    paddingHorizontal: 24,
   },
   tagTitle: {
     paddingHorizontal: 24,
     fontSize: 14,
     fontWeight: "600",
-    color: "#5f5f5f",
     textTransform: "capitalize",
   },
 

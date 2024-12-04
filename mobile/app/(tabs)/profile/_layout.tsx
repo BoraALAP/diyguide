@@ -1,7 +1,8 @@
-import { Slot, Stack } from "expo-router";
+import { router, Slot, Stack } from "expo-router";
 import React from "react";
 import Colors from "@/constants/Colors";
-import { useColorScheme } from "react-native";
+import { Pressable, useColorScheme } from "react-native";
+import { Text } from "@/components/Themed";
 
 const _layout = () => {
   const colorScheme = useColorScheme();
@@ -22,6 +23,20 @@ const _layout = () => {
           contentStyle: {
             backgroundColor: Colors[colorScheme ?? "light"].background,
           },
+        }}
+      />
+      <Stack.Screen
+        name="editmodal"
+        options={{
+          presentation: "formSheet",
+          title: "",
+          headerLeft: () => null,
+          headerRight: () => (
+            <Pressable onPress={() => router.back()} style={{ padding: 10 }}>
+              <Text>✕</Text>
+            </Pressable>
+          ),
+          gestureEnabled: true,
         }}
       />
     </Stack>

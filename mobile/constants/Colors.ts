@@ -13,6 +13,7 @@ export default {
     inputBackground: "rgba(255, 255, 255, 0.75)",
     border: "rgba(200, 200, 200, 1)",
     headerBackground: "rgba(255, 255, 255, 0.55)",
+    error: "rgba(255, 0, 0, 1)",
   },
   dark: {
     text: "rgba(255, 255, 255, 1)",
@@ -25,5 +26,6 @@ export default {
     inputBackground: "rgba(24, 24, 24, 0.75)",
     border: "rgba(100, 100, 100, 1)",
     headerBackground: "rgba(0, 0, 0, 0.55)",
+    error: "rgba(255, 100, 100, 1)",
   },
 };

@@ -18,7 +18,11 @@
       "developmentClient": true,
       "channel": "development",
       "env": {
-        "APP_ENV": "development"
+        "APP_ENV": "development",
+        "EXPO_PUBLIC_ADMOBS_IOS": "ca-app-pub-6699425673576615~4871633472",
+        "EXPO_PUBLIC_ADMOBS_ANDROID": "ca-app-pub-6699425673576615~8767309166",
+        "EXPO_PUBLIC_ADMOBS_ADUNIT_IOS": "ca-app-pub-6699425673576615/8594148840",
+        "EXPO_PUBLIC_ADMOBS_ADUNIT_ANDROID": "ca-app-pub-6699425673576615/7785571422"
       }
     },
     "preview": {
@@ -32,7 +36,11 @@
         "EXPO_PUBLIC_API_AUTH_KEY": "8f47e8c1-9b4a-4f8d-b7d5-e89c3f6d2a4e",
         "EXPO_PUBLIC_BACKEND_URL": "https://diyguide.vercel.app",
         "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR",
-        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_VQnUwsKGzAewRCjpkRWneyLeJTJ"
+        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_VQnUwsKGzAewRCjpkRWneyLeJTJ",
+        "EXPO_PUBLIC_ADMOBS_IOS": "ca-app-pub-6699425673576615~4871633472",
+        "EXPO_PUBLIC_ADMOBS_ANDROID": "ca-app-pub-6699425673576615~8767309166",
+        "EXPO_PUBLIC_ADMOBS_ADUNIT_IOS": "ca-app-pub-6699425673576615/8594148840",
+        "EXPO_PUBLIC_ADMOBS_ADUNIT_ANDROID": "ca-app-pub-6699425673576615/7785571422"
       }
     },
     "production": {
@@ -44,7 +52,11 @@
         "EXPO_PUBLIC_API_AUTH_KEY": "8f47e8c1-9b4a-4f8d-b7d5-e89c3f6d2a4e",
         "EXPO_PUBLIC_BACKEND_URL": "https://diyguide.vercel.app",
         "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR",
-        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_VQnUwsKGzAewRCjpkRWneyLeJTJ"
+        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_VQnUwsKGzAewRCjpkRWneyLeJTJ",
+        "EXPO_PUBLIC_ADMOBS_IOS": "ca-app-pub-6699425673576615~4871633472",
+        "EXPO_PUBLIC_ADMOBS_ANDROID": "ca-app-pub-6699425673576615~8767309166",
+        "EXPO_PUBLIC_ADMOBS_ADUNIT_IOS": "ca-app-pub-6699425673576615/8594148840",
+        "EXPO_PUBLIC_ADMOBS_ADUNIT_ANDROID": "ca-app-pub-6699425673576615/7785571422"
       }
     }
   },

@@ -45,7 +45,18 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       output: "static",
       favicon: "./assets/images/favicon.png",
     },
-    plugins: ["expo-router", "expo-font"],
+    plugins: [
+      "expo-router",
+      "expo-font",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": process.env.EXPO_PUBLIC_ADMOBS_ANDROID,
+          "iosAppId": process.env.EXPO_PUBLIC_ADMOBS_IOS,
+        },
+      ],
+      "expo-build-properties",
+    ],
     experiments: {
       typedRoutes: true,
     },

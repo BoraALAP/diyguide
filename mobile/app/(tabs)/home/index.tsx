@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 
@@ -16,7 +17,10 @@ import SuggestionCard from "@/components/SuggestionCard";
 import { PageTitle, Text } from "@/components/Themed";
 import InputWrapper from "@/components/InputWrapper";
 
+import { useAuth } from "@/utils/AuthProvider";
+
 const HomeScreen = ({ navigation }: { navigation: any }) => {
+  const { profile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState<string | null>(null);
   const [error, setError] = useState<any>(null);
@@ -43,7 +47,6 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
         setError(error);
       }
       if (data) {
-        console.log("data", data);
         setSuggestions(data as Guides[]);
       }
       setLoading(false);
@@ -69,40 +72,77 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
 
   const handleGenerate = async () => {
     setLoading(true);
-
-    const apiKey = process.env.EXPO_PUBLIC_API_AUTH_KEY;
-    if (!apiKey) {
-      console.error("API key is missing");
-      return;
-    }
-
-    const response = await fetch(
-      process.env.EXPO_PUBLIC_BACKEND_URL + "/api/generate-guide",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          query: search,
-        }),
-      }
-    );
-    const { data, error } = await response.json();
-    setSuggestions((prev) => [data, ...prev.slice(0, 9)]);
-    setGuides({ guides: [], notfound: false });
-    setSearch(null);
-
-    if (await data.id) {
-      console.log("id true", data.id);
-
-      router.push({
-        pathname: "/[guide]/guide",
-        params: { guide: await data.id },
-      });
+    if (!profile) {
+      Alert.alert(
+        "Please login first",
+        "You need to be logged in to generate a guide",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Login",
+            style: "default",
+            onPress: async () => {
+              router.push("/profile");
+            },
+          },
+        ]
+      );
+    } else if (profile?.tokens === 0) {
+      Alert.alert(
+        "You don't have enough tokens",
+        "You need to buy more tokens to generate a guide",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Buy tokens",
+            style: "default",
+            onPress: async () => {
+              router.push("/profile");
+            },
+          },
+        ]
+      );
     } else {
-      setError("Something went wrong");
+      const apiKey = process.env.EXPO_PUBLIC_API_AUTH_KEY;
+      if (!apiKey) {
+        console.error("API key is missing");
+        return;
+      }
+
+      const response = await fetch(
+        process.env.EXPO_PUBLIC_BACKEND_URL + "/api/generate-guide",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": apiKey,
+          },
+          body: JSON.stringify({
+            query: search,
+          }),
+        }
+      );
+      const { data, error } = await response.json();
+      setSuggestions((prev) => [data, ...prev.slice(0, 9)]);
+      setGuides({ guides: [], notfound: false });
+      setSearch(null);
+
+      if (await data.id) {
+        console.log("id true", data.id);
+
+        router.push({
+          pathname: "/[guide]/guide",
+          params: { guide: await data.id },
+        });
+      } else {
+        setError("Something went wrong");
+      }
     }
 
     setLoading(false);

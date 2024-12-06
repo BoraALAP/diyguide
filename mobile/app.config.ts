@@ -30,8 +30,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       backgroundColor: "#ffffff",
     },
     ios: {
-      supportsTablet: true,
+      // supportsTablet: true,
       bundleIdentifier: getBundleIdentifier(),
+      buildNumber: "1.0.2",
     },
     android: {
       adaptiveIcon: {
@@ -48,14 +49,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     plugins: [
       "expo-router",
       "expo-font",
-      [
-        "react-native-google-mobile-ads",
-        {
-          "androidAppId": process.env.EXPO_PUBLIC_ADMOBS_ANDROID,
-          "iosAppId": process.env.EXPO_PUBLIC_ADMOBS_IOS,
-        },
-      ],
-      "expo-build-properties",
     ],
     experiments: {
       typedRoutes: true,

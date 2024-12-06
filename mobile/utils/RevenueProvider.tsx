@@ -2,17 +2,17 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { Platform } from "react-native";
 import Purchases, {
   CustomerInfo,
-  PurchasesOffering,
+  PurchasesPackage,
 } from "react-native-purchases";
-import RevenueCatUI, { PAYWALL_RESULT } from "react-native-purchases-ui";
+import { useAuth } from "./AuthProvider";
 
 interface RevenueContextType {
   loading: boolean;
-  subscribed: boolean;
+  // subscribed: boolean;
   customerInfo: CustomerInfo | undefined;
-  checkPaywall: () => Promise<boolean | undefined>;
-  display: () => Promise<void>;
-  purchaseTokens: () => Promise<boolean>;
+  // checkPaywall: () => Promise<boolean | undefined>;
+  // display: () => Promise<void>;
+  purchaseTokens: (pack: PurchasesPackage) => Promise<boolean>;
 }
 
 const RevenueContext = createContext<RevenueContextType | undefined>(undefined);
@@ -20,9 +20,11 @@ const RevenueContext = createContext<RevenueContextType | undefined>(undefined);
 export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const { updateProfile } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [subscribed, setSubscribed] = useState(false);
+  // const [subscribed, setSubscribed] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>();
+  const [offerings, setOfferings] = useState<PurchasesPackage[] | null>(null);
 
   useEffect(() => {
     const setup = async () => {
@@ -36,7 +38,11 @@ export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
           apiKey: apiKey,
         });
         Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
-        await checkSubscriptionStatus();
+        Purchases.addCustomerInfoUpdateListener((customerInfo) => {
+          setCustomerInfo(customerInfo);
+        });
+        // await checkSubscriptionStatus();
+        await loadOfferings();
       } catch (error) {
         console.error("RevenueCat setup error", error);
       }
@@ -45,76 +51,34 @@ export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
     setup().catch((error) => console.error("RevenueCat setup error", error));
   }, []);
 
-  const checkSubscriptionStatus = async () => {
-    try {
-      const customerInfo = await Purchases.getCustomerInfo();
-      setCustomerInfo(customerInfo);
-    } catch (error) {
-      console.error("Error fetching customer info", error);
+  const loadOfferings = async () => {
+    const offerings = await Purchases.getOfferings();
+    const currentOfferings = offerings.current;
+    if (currentOfferings) {
+      setOfferings(currentOfferings.availablePackages);
     }
   };
 
-  const display = async () => {
-    try {
-      const offerings = await Purchases.getOfferings();
-      console.log("offerings", offerings);
+  // const checkSubscriptionStatus = async () => {
+  //   try {
+  //     const customerInfo = await Purchases.getCustomerInfo();
+  //     setCustomerInfo(customerInfo);
+  //   } catch (error) {
+  //     console.error("Error fetching customer info", error);
+  //   }
+  // };
 
-      if (offerings.current !== null) {
-        await RevenueCatUI.presentPaywall({
-          offering: offerings.current,
-        });
-      }
-    } catch (error) {
-      console.error("Error displaying paywall", error);
-    }
-  };
-
-  const checkPaywall = async () => {
+  const purchaseTokens = async (pack: PurchasesPackage) => {
     setLoading(true);
     try {
-      const paywallResult: PAYWALL_RESULT =
-        await RevenueCatUI.presentPaywallIfNeeded({
-          requiredEntitlementIdentifier: "pro",
-        });
+      await Purchases.purchasePackage(pack);
 
-      switch (paywallResult) {
-        case PAYWALL_RESULT.PURCHASED:
-        case PAYWALL_RESULT.RESTORED:
-        case PAYWALL_RESULT.NOT_PRESENTED:
-          setSubscribed(true);
-          await checkSubscriptionStatus();
-          return true;
-        case PAYWALL_RESULT.CANCELLED:
-        case PAYWALL_RESULT.ERROR:
-          setSubscribed(false);
-          return false;
-        default:
-          setSubscribed(false);
-          return false;
+      if (pack.product.identifier === "ten_token") {
+        updateProfile({ tokens: 10 });
+      } else if (pack.product.identifier === "hundred_token") {
+        updateProfile({ tokens: 100 });
       }
-    } catch (error) {
-      console.error("Error checking paywall", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const purchaseTokens = async () => {
-    setLoading(true);
-    try {
-      const offerings = await Purchases.getOfferings();
-
-      if (offerings.current) {
-        const tokenPackage = offerings.current.availablePackages[0];
-
-        const { customerInfo: updatedInfo } = await Purchases.purchasePackage(
-          tokenPackage
-        );
-        setCustomerInfo(updatedInfo);
-        await checkSubscriptionStatus();
-        return true;
-      }
-      return false;
+      return true;
     } catch (error) {
       console.error("Error purchasing tokens", error);
       return false;
@@ -123,14 +87,67 @@ export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  // const display = async () => {
+  //   console.log("display");
+  //   try {
+  //     const offerings = await Purchases.getOfferings();
+  //     console.log("offerings", offerings);
+
+  //     if (offerings.current !== null) {
+  //       const paywallResult: PAYWALL_RESULT = await RevenueCatUI.presentPaywall(
+  //         {
+  //           offering: offerings.current,
+  //           displayCloseButton: true,
+  //         }
+  //       );
+  //       if (paywallResult === PAYWALL_RESULT.PURCHASED) {
+  //         console.log(customerInfo);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error displaying paywall", error);
+  //   }
+  // };
+
+  // const checkPaywall = async () => {
+  //   console.log("checkPaywall");
+  //   setLoading(true);
+  //   try {
+  //     const paywallResult: PAYWALL_RESULT =
+  //       await RevenueCatUI.presentPaywallIfNeeded({
+  //         requiredEntitlementIdentifier: "pro",
+  //       });
+
+  //     switch (paywallResult) {
+  //       case PAYWALL_RESULT.PURCHASED:
+  //       case PAYWALL_RESULT.RESTORED:
+  //       case PAYWALL_RESULT.NOT_PRESENTED:
+  //         setSubscribed(true);
+  //         await checkSubscriptionStatus();
+  //         return true;
+  //       case PAYWALL_RESULT.CANCELLED:
+  //       case PAYWALL_RESULT.ERROR:
+  //         setSubscribed(false);
+  //         return false;
+  //       default:
+  //         setSubscribed(false);
+  //         return false;
+  //     }
+  //   } catch (error) {
+  //     console.error("Error checking paywall", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   return (
     <RevenueContext.Provider
       value={{
         loading,
-        subscribed,
+        // subscribed,
         customerInfo,
-        checkPaywall,
-        display,
+        // checkPaywall,
+        // display,
         purchaseTokens,
       }}
     >

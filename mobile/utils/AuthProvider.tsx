@@ -11,6 +11,7 @@ interface AuthContextType {
   getProfile: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
   signOut: () => Promise<void>;
+  removeToken: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -72,19 +73,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!session?.user) throw new Error("No user on the session!");
 
       const updatedData = {
-        id: session?.user.id,
         ...updates,
+        tokens: (profile?.tokens || 0) + (updates.tokens || 0),
         updated_at: new Date().toISOString(),
       };
 
       const { data, error } = await supabase
         .from("user")
-        .upsert(updatedData)
+        .update(updatedData)
+        .eq("id", session?.user.id)
         .select("*");
 
       if (error) throw error;
 
       setProfile(data[0]); // Access first element since data is an array
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function removeToken() {
+    try {
+      setLoading(true);
+      if (!session?.user) throw new Error("No user on the session!");
+      if (!profile?.tokens || profile.tokens <= 0)
+        throw new Error("No tokens available!");
+
+      const updatedData = {
+        tokens: profile.tokens - 1,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { data, error } = await supabase
+        .from("user")
+        .update(updatedData)
+        .eq("id", session?.user.id)
+        .select("*");
+
+      if (error) throw error;
+
+      setProfile(data[0]);
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(error.message);
@@ -116,6 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         loading,
         getProfile,
         updateProfile,
+        removeToken,
         signOut,
       }}
     >

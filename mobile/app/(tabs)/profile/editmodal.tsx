@@ -1,11 +1,12 @@
 import React from "react";
-import { StyleSheet, TextInput, View, Platform } from "react-native";
-import { Text } from "@/components/Themed";
-import Button from "@/components/Button";
+import { StyleSheet } from "react-native";
+
+import { Button } from "@/components/Button";
 import { useAuth } from "@/utils/AuthProvider";
 import { router } from "expo-router";
 
 import Input from "@/components/Input";
+import { View } from "@/components/Themed";
 
 export default function EditProfileModal() {
   const { profile, loading, updateProfile } = useAuth();
@@ -18,25 +19,29 @@ export default function EditProfileModal() {
 
   return (
     <View style={styles.container}>
-      <Input
-        label="Full Name"
-        value={fullName}
-        onChangeText={setFullName}
-        placeholder="Full Name"
-      />
+      <View style={styles.content}>
+        <Input
+          label="Full Name"
+          value={fullName}
+          onChangeText={setFullName}
+          placeholder="Full Name"
+        />
 
-      <View style={styles.modalButtons}>
-        <Button
-          onPress={() => router.back()}
-          title="Cancel"
-          variant="secondary"
-        />
-        <Button
-          onPress={handleSave}
-          disabled={loading}
-          title={loading ? "Saving..." : "Save"}
-          variant="primary"
-        />
+        <View style={styles.buttonContainer}>
+          <Button
+            onPress={handleSave}
+            disabled={loading}
+            title={loading ? "Saving..." : "Save"}
+            variant="primary"
+            size="large"
+          />
+          <Button
+            onPress={() => router.back()}
+            title="Cancel"
+            variant="secondary"
+            size="large"
+          />
+        </View>
       </View>
     </View>
   );
@@ -47,23 +52,26 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
   },
+  content: {
+    flex: 1,
+    gap: 24,
+  },
   bottomSheet: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
     paddingTop: 12,
   },
-
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
   },
-
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 12,
+  buttonContainer: {
+    position: "absolute",
+    bottom: 24,
+    width: "100%",
+    gap: 16,
   },
 });

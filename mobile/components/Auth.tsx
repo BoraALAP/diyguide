@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Alert, StyleSheet, TextInput, View } from "react-native";
 import { supabase } from "@/lib/supabaseClient";
-import Button from "./Button";
+// import { Button } from "./Button";
+import { Button, Input } from "@rneui/themed";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -42,9 +43,9 @@ export default function Auth() {
   return (
     <View style={styles.container}>
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <TextInput
-          // label="Email"
-          // leftIcon={{ type: 'font-awesome', name: 'envelope' }}
+        <Input
+          label="Email"
+          leftIcon={{ type: "font-awesome", name: "envelope" }}
           onChangeText={(text: string) => setEmail(text)}
           value={email}
           placeholder="email@address.com"
@@ -52,9 +53,9 @@ export default function Auth() {
         />
       </View>
       <View style={styles.verticallySpaced}>
-        <TextInput
-          // label="Password"
-          // leftIcon={{ type: "font-awesome", name: "lock" }}
+        <Input
+          label="Password"
+          leftIcon={{ type: "font-awesome", name: "lock" }}
           onChangeText={(text: string) => setPassword(text)}
           value={password}
           secureTextEntry={true}

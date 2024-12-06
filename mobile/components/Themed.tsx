@@ -35,8 +35,8 @@ export function useThemeColor(
   }
 }
 
-export function Text(props: TextProps) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
+export function Text(props: TextProps & { bold?: boolean }) {
+  const { style, lightColor, darkColor, bold, ...otherProps } = props;
   const color = useThemeColor(
     {
       light: lightColor ?? Colors.light.text,
@@ -45,7 +45,12 @@ export function Text(props: TextProps) {
     "text"
   );
 
-  return <DefaultText style={[{ color }, style]} {...otherProps} />;
+  return (
+    <DefaultText
+      style={[{ color }, bold && { fontWeight: "bold" }, style]}
+      {...otherProps}
+    />
+  );
 }
 
 export function SecondaryText(props: TextProps) {
@@ -56,7 +61,7 @@ export function SecondaryText(props: TextProps) {
   );
 
   return (
-    <DefaultText style={[{ color }, style, { fontSize: 12 }]} {...otherProps} />
+    <DefaultText style={[{ color }, style, { fontSize: 13 }]} {...otherProps} />
   );
 }
 
@@ -91,7 +96,12 @@ export const ScrollView = (props: ScrollViewProps) => {
     "background"
   );
   return (
-    <DefaultScrollView style={[{ backgroundColor }, style]} {...otherProps} />
+    <DefaultScrollView
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
+      style={[{ backgroundColor }, style]}
+      {...otherProps}
+    />
   );
 };
 

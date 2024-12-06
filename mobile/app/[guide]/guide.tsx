@@ -1,10 +1,5 @@
 import React, { Suspense, useState, useEffect } from "react";
-import {
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  useColorScheme,
-} from "react-native";
+import { View, StyleSheet, useColorScheme } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { supabase } from "@/lib/supabaseClient";
 import {
@@ -14,6 +9,7 @@ import {
   Text,
 } from "@/components/Themed";
 import Colors from "@/constants/Colors";
+import Loading from "@/components/Loading";
 
 const getThemedStyles = (colorScheme: "light" | "dark" | null) => {
   return StyleSheet.create({
@@ -25,32 +21,35 @@ const getThemedStyles = (colorScheme: "light" | "dark" | null) => {
       rowGap: 8,
       padding: 24,
       paddingTop: 120,
-      backgroundColor: Colors[colorScheme ?? "light"].cardBackground,
+      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
     },
     materials: {
       rowGap: 8,
       padding: 24,
-      backgroundColor: Colors[colorScheme ?? "light"].cardBackground,
+      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
     },
     tools: {
       rowGap: 8,
       padding: 24,
-      backgroundColor: Colors[colorScheme ?? "light"].cardBackground,
+      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
     },
     stepMaterials: {
       rowGap: 8,
       padding: 12,
-      backgroundColor: Colors[colorScheme ?? "light"].cardBackground,
+      borderRadius: 12,
+      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
     },
     stepTools: {
       rowGap: 8,
       padding: 12,
-      backgroundColor: Colors[colorScheme ?? "light"].cardBackground,
+      borderRadius: 12,
+      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
     },
     tips: {
       rowGap: 8,
       marginHorizontal: 24,
-      backgroundColor: Colors[colorScheme ?? "light"].cardBackground,
+      borderRadius: 12,
+      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
       padding: 24,
     },
     title: {
@@ -124,12 +123,10 @@ const page = () => {
     func();
   }, []);
 
-  console.log(info);
-
   const styles = getThemedStyles(colorScheme ?? "light");
 
   return (
-    <Suspense fallback={<ActivityIndicator />}>
+    <Suspense fallback={<Loading />}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <PageTitle>{info?.title}</PageTitle>

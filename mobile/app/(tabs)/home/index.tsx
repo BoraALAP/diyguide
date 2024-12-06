@@ -3,7 +3,6 @@ import {
   View,
   FlatList,
   StyleSheet,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Alert,
@@ -18,9 +17,10 @@ import { PageTitle, Text } from "@/components/Themed";
 import InputWrapper from "@/components/InputWrapper";
 
 import { useAuth } from "@/utils/AuthProvider";
+import Loading from "@/components/Loading";
 
 const HomeScreen = ({ navigation }: { navigation: any }) => {
-  const { profile } = useAuth();
+  const { profile, removeToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState<string | null>(null);
   const [error, setError] = useState<any>(null);
@@ -129,13 +129,19 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
         }
       );
       const { data, error } = await response.json();
+      if (error) {
+        console.log("error", error);
+
+        setError(error);
+        return;
+      }
+
       setSuggestions((prev) => [data, ...prev.slice(0, 9)]);
       setGuides({ guides: [], notfound: false });
       setSearch(null);
 
       if (await data.id) {
-        console.log("id true", data.id);
-
+        await removeToken();
         router.push({
           pathname: "/[guide]/guide",
           params: { guide: await data.id },
@@ -150,7 +156,7 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
 
   if (error) {
     return (
-      <View style={styles.loading}>
+      <View style={styles.pageCenter}>
         <Text>Something is wrong</Text>
       </View>
     );
@@ -163,12 +169,10 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
     >
       <View style={styles.contentContainer}>
         {loading ? (
-          <View style={styles.loading}>
-            <ActivityIndicator />
-          </View>
+          <Loading />
         ) : search !== null && search !== "" ? (
           guides.notfound ? (
-            <View style={styles.loading}>
+            <View style={styles.pageCenter}>
               <Text>No guides found</Text>
             </View>
           ) : (
@@ -198,6 +202,7 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
                 return <SuggestionCard guide={item} />;
               }}
               numColumns={2}
+              showsVerticalScrollIndicator={false}
             />
           </View>
         )}
@@ -213,6 +218,7 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
 };
 
 const styles = StyleSheet.create({
+  pageContainer: { gap: 16 },
   container: {
     flex: 1,
   },
@@ -221,19 +227,18 @@ const styles = StyleSheet.create({
     paddingTop: 88,
   },
   flatlist: {
-    height: "100%",
     paddingHorizontal: 8,
   },
-  content: {
+  pageCenter: {
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  content: {
     gap: 16,
-    paddingBottom: 88,
+    paddingBottom: 120,
     paddingTop: 16,
   },
-
-  loading: { flex: 1, justifyContent: "center", alignItems: "center" },
-
-  pageContainer: { gap: 16 },
   title: {
     paddingHorizontal: 24,
   },

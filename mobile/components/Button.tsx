@@ -16,7 +16,7 @@ interface ButtonProps extends PressableProps {
   size?: "small" | "medium" | "large";
 }
 
-const Button = ({
+export const Button = ({
   title,
   variant = "primary",
   size = "medium",
@@ -77,4 +77,43 @@ const Button = ({
   );
 };
 
-export default Button;
+interface InlineButtonProps extends PressableProps {
+  title: string;
+  color?: "primary" | "error";
+}
+
+export const InlineButton = ({
+  title,
+  color = "primary",
+  style,
+  ...props
+}: InlineButtonProps) => {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+
+  const styles = StyleSheet.create({
+    button: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    text: {
+      fontSize: 13,
+      fontWeight: "600",
+    },
+    primary: {
+      color: theme.tint,
+    },
+    error: {
+      color: theme.error,
+    },
+  });
+
+  return (
+    <Pressable
+      style={[styles.button, style as StyleProp<ViewStyle>]}
+      {...props}
+    >
+      <Text style={[styles.text, styles[color]]}>{title}</Text>
+    </Pressable>
+  );
+};

@@ -28,7 +28,21 @@ const _layout = () => {
       <Stack.Screen
         name="editmodal"
         options={{
-          presentation: "formSheet",
+          presentation: "modal",
+          title: "",
+          headerLeft: () => null,
+          headerRight: () => (
+            <Pressable onPress={() => router.back()} style={{ padding: 10 }}>
+              <Text>✕</Text>
+            </Pressable>
+          ),
+          gestureEnabled: true,
+        }}
+      />
+      <Stack.Screen
+        name="paywall"
+        options={{
+          presentation: "modal",
           title: "",
           headerLeft: () => null,
           headerRight: () => (

@@ -1,11 +1,11 @@
-import Button from "@/components/Button";
-import { Text, View, PageTitle, SecondaryText } from "@/components/Themed";
-import React, { useState } from "react";
+import React from "react";
 import { StyleSheet, Image } from "react-native";
+import { router } from "expo-router";
+
 import Auth from "@/components/Auth";
 import { useAuth } from "@/utils/AuthProvider";
-import EditModal from "./editmodal";
-import { router } from "expo-router";
+import { Button } from "@/components/Button";
+import { View, PageTitle, SecondaryText } from "@/components/Themed";
 import PurchaseButton from "@/components/PurchaseButton";
 
 const ProfileScreen = () => {
@@ -35,9 +35,9 @@ const ProfileScreen = () => {
               <SecondaryText>Available Tokens: {profile.tokens}</SecondaryText>
             </View>
           </View>
+          <PurchaseButton />
 
           <View style={styles.buttonContainer}>
-            <PurchaseButton />
             <Button
               onPress={() => router.push("/profile/editmodal")}
               title="Edit Profile"
@@ -48,7 +48,7 @@ const ProfileScreen = () => {
               onPress={signOut}
               disabled={loading}
               title={loading ? "Signing out..." : "Sign Out"}
-              variant="primary"
+              variant="secondary"
               size="large"
             />
           </View>
@@ -63,9 +63,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 20,
+    height: "100%",
   },
   profileContainer: {
     gap: 24,
+    flex: 1,
+    paddingTop: 100,
   },
   avatarContainer: {
     flexDirection: "row",
@@ -83,6 +86,10 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     gap: 12,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });
 

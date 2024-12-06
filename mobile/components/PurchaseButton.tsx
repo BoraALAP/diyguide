@@ -1,7 +1,9 @@
-import React from "react";
-import Button from "./Button";
-import { Alert } from "react-native";
+import React, { useState } from "react";
+import { Button } from "./Button";
+
 import { useRevenue } from "@/utils/RevenueProvider";
+import { router } from "expo-router";
+
 interface PurchaseButtonProps {
   variant?: "primary" | "secondary";
   size?: "small" | "medium" | "large";
@@ -11,28 +13,18 @@ const PurchaseButton = ({
   variant = "primary",
   size = "large",
 }: PurchaseButtonProps) => {
-  const { loading, purchaseTokens, display } = useRevenue();
-
-  const handlePurchase = async () => {
-    try {
-      await display();
-      const success = await purchaseTokens();
-      if (success) {
-        Alert.alert("Success", "Tokens purchased successfully!");
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to purchase tokens. Please try again.");
-    }
-  };
+  const { loading } = useRevenue();
 
   return (
-    <Button
-      onPress={handlePurchase}
-      title={loading ? "Processing..." : "Buy More Tokens"}
-      variant={variant}
-      size={size}
-      disabled={loading}
-    />
+    <>
+      <Button
+        onPress={() => router.push("/profile/paywall")}
+        title={loading ? "Processing..." : "Buy More Tokens"}
+        variant={variant}
+        size={size}
+        disabled={loading}
+      />
+    </>
   );
 };
 

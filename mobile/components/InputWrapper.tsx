@@ -3,7 +3,7 @@ import { TextInput, StyleSheet } from "react-native";
 import { BlurView } from "expo-blur";
 import { useThemeColor } from "./Themed";
 import Colors from "@/constants/Colors";
-import Button from "./Button";
+import { Button } from "./Button";
 
 const InputWrapper = ({
   search,

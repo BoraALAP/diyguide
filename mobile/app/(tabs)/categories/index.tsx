@@ -1,16 +1,15 @@
 import { supabase } from "../../../lib/supabaseClient";
-import {
-  ActivityIndicator,
-  FlatList,
-  ScrollView,
-  StyleSheet,
-} from "react-native";
+import { FlatList, ScrollView, StyleSheet } from "react-native";
 
 import { useEffect, useState } from "react";
 import { Tags } from "@/types/custom";
 import { Json } from "@/types/supabase";
 import CategorySuggestionCard from "@/components/CategorySuggestionCard";
 import { PageTitle, SecondaryText, Text, View } from "@/components/Themed";
+import { router } from "expo-router";
+import Colors from "@/constants/Colors";
+import { InlineButton } from "@/components/Button";
+import Loading from "@/components/Loading";
 
 type TagsType = Tags & {
   guide_tags: GuideTagsWithGuides[];
@@ -54,8 +53,6 @@ export default function CategoriesScreen() {
         `);
 
       if (error) {
-        console.log("error", error);
-
         setError(error);
       }
       if (data) {
@@ -70,26 +67,42 @@ export default function CategoriesScreen() {
     func();
   }, []);
 
-  console.log(tags, error);
-
   return (
     <ScrollView
       style={styles.pageContainer}
       contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
     >
       {loading ? (
-        <View style={styles.loading}>
-          <ActivityIndicator />
-        </View>
+        <Loading />
       ) : (
         <View style={styles.container}>
           <PageTitle style={styles.title}>Categories</PageTitle>
+
           {tags.map((tag: TagsType) => {
+            function capitalizeWords(name: string): string {
+              return name.replace(/\b\w/g, (char) => char.toUpperCase());
+            }
+
             return (
               <View key={tag.id} style={styles.tagContainer}>
-                <SecondaryText style={styles.tagTitle}>
-                  {tag.name}
-                </SecondaryText>
+                <View style={styles.tagHeader}>
+                  <SecondaryText style={styles.tagTitle}>
+                    {capitalizeWords(tag.name)}
+                  </SecondaryText>
+                  <InlineButton
+                    title="View All"
+                    onPress={() =>
+                      router.push({
+                        pathname: "/categories/[id]",
+                        params: {
+                          id: tag.id,
+                          title: capitalizeWords(tag.name),
+                        },
+                      })
+                    }
+                  />
+                </View>
                 <FlatList
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -110,9 +123,9 @@ export default function CategoriesScreen() {
 }
 
 const styles = StyleSheet.create({
-  loading: { flex: 1, justifyContent: "center", alignItems: "center" },
   pageContainer: { gap: 16 },
-  content: { paddingTop: 88 },
+
+  content: { paddingTop: 88, paddingBottom: 32 },
 
   flatlistContent: { marginTop: 8, marginBottom: 4, paddingHorizontal: 8 },
   tagContainer: { gap: 4 },
@@ -123,8 +136,13 @@ const styles = StyleSheet.create({
   title: {
     paddingHorizontal: 24,
   },
-  tagTitle: {
+  tagHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 24,
+  },
+  tagTitle: {
     fontSize: 14,
     fontWeight: "600",
     textTransform: "capitalize",

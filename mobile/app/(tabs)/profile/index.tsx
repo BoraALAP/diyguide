@@ -1,23 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Image } from "react-native";
 import { router } from "expo-router";
+import * as Updates from "expo-updates";
 
 import Auth from "@/components/Auth";
-import { useAuth } from "@/utils/AuthProvider";
 import { Button } from "@/components/Button";
-import { View, PageTitle, SecondaryText } from "@/components/Themed";
+import { ViewT, PageTitle, SecondaryText, TextT } from "@/components/Themed";
 import PurchaseButton from "@/components/PurchaseButton";
+import { useSupabase } from "@/utils/SupabaseProvider";
 
 const ProfileScreen = () => {
-  const { profile, loading, signOut } = useAuth();
+  const { profile, loading, signOut } = useSupabase();
 
   return (
-    <View style={styles.container}>
+    <ViewT style={styles.container}>
       {!profile ? (
         <Auth />
       ) : (
-        <View style={styles.profileContainer}>
-          <View style={styles.avatarContainer}>
+        <ViewT style={styles.profileContainer}>
+          <ViewT style={styles.avatarContainer}>
             <Image
               source={
                 profile?.avatar_url
@@ -30,14 +31,14 @@ const ProfileScreen = () => {
               }
               style={styles.avatar}
             />
-            <View style={styles.userInfo}>
+            <ViewT style={styles.userInfo}>
               <PageTitle>{profile?.full_name || "Add your name"}</PageTitle>
               <SecondaryText>Available Tokens: {profile.tokens}</SecondaryText>
-            </View>
-          </View>
+            </ViewT>
+          </ViewT>
           <PurchaseButton />
 
-          <View style={styles.buttonContainer}>
+          <ViewT style={styles.buttonContainer}>
             <Button
               onPress={() => router.push("/profile/editmodal")}
               title="Edit Profile"
@@ -51,10 +52,14 @@ const ProfileScreen = () => {
               variant="secondary"
               size="large"
             />
-          </View>
-        </View>
+          </ViewT>
+        </ViewT>
       )}
-    </View>
+      <ViewT style={styles.versionContainer}>
+        <SecondaryText>{Updates.runtimeVersion}</SecondaryText>
+        <SecondaryText>{Updates.updateId}</SecondaryText>
+      </ViewT>
+    </ViewT>
   );
 };
 
@@ -90,6 +95,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  versionContainer: {
+    gap: 4,
+    alignItems: "center",
   },
 });
 

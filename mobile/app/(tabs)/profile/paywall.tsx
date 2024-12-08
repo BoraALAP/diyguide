@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, useColorScheme } from "react-native";
-import { Text, View, PageTitle, SecondaryText } from "@/components/Themed";
+import { TextT, ViewT, PageTitle, SecondaryText } from "@/components/Themed";
 import { useRevenue } from "@/utils/RevenueProvider";
 import { Button } from "@/components/Button";
 import Purchases, {
@@ -71,15 +71,15 @@ const PaywallScreen = () => {
   console.log(offerings);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
+    <ViewT style={styles.container}>
+      <ViewT style={styles.content}>
         <PageTitle>Get More Tokens</PageTitle>
         <SecondaryText>
           Purchase tokens to continue generating amazing content
         </SecondaryText>
 
         {offerings?.current?.availablePackages.map((pkg, index) => (
-          <View
+          <ViewT
             key={index}
             style={[
               styles.packageContainer,
@@ -87,12 +87,12 @@ const PaywallScreen = () => {
             ]}
             onTouchEnd={() => setSelectedPackage(pkg)}
           >
-            <Text bold>{pkg.product.title}</Text>
-            <Text>{pkg.product.description}</Text>
-            <Text>{pkg.product.priceString}</Text>
-          </View>
+            <TextT bold>{pkg.product.title}</TextT>
+            <TextT>{pkg.product.description}</TextT>
+            <TextT>{pkg.product.priceString}</TextT>
+          </ViewT>
         ))}
-        <View style={styles.buttonContainer}>
+        <ViewT style={styles.buttonContainer}>
           <Button
             onPress={handlePurchase}
             title={loading ? "Processing..." : "Purchase Selected Package"}
@@ -100,9 +100,9 @@ const PaywallScreen = () => {
             size="large"
             disabled={loading || !selectedPackage}
           />
-        </View>
-      </View>
-    </View>
+        </ViewT>
+      </ViewT>
+    </ViewT>
   );
 };
 

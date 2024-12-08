@@ -2,7 +2,7 @@ import { router, Slot, Stack } from "expo-router";
 import React from "react";
 import Colors from "@/constants/Colors";
 import { Pressable, useColorScheme } from "react-native";
-import { Text } from "@/components/Themed";
+import { TextT } from "@/components/Themed";
 
 const _layout = () => {
   const colorScheme = useColorScheme();
@@ -33,7 +33,7 @@ const _layout = () => {
           headerLeft: () => null,
           headerRight: () => (
             <Pressable onPress={() => router.back()} style={{ padding: 10 }}>
-              <Text>✕</Text>
+              <TextT>✕</TextT>
             </Pressable>
           ),
           gestureEnabled: true,
@@ -47,7 +47,7 @@ const _layout = () => {
           headerLeft: () => null,
           headerRight: () => (
             <Pressable onPress={() => router.back()} style={{ padding: 10 }}>
-              <Text>✕</Text>
+              <TextT>✕</TextT>
             </Pressable>
           ),
           gestureEnabled: true,

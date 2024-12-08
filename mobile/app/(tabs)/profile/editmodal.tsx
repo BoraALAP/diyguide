@@ -2,14 +2,14 @@ import React from "react";
 import { StyleSheet } from "react-native";
 
 import { Button } from "@/components/Button";
-import { useAuth } from "@/utils/AuthProvider";
+import { useSupabase } from "@/utils/SupabaseProvider";
 import { router } from "expo-router";
 
 import Input from "@/components/Input";
-import { View } from "@/components/Themed";
+import { ViewT } from "@/components/Themed";
 
 export default function EditProfileModal() {
-  const { profile, loading, updateProfile } = useAuth();
+  const { profile, loading, updateProfile } = useSupabase();
   const [fullName, setFullName] = React.useState(profile?.full_name || "");
 
   const handleSave = async () => {
@@ -18,8 +18,8 @@ export default function EditProfileModal() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
+    <ViewT style={styles.container}>
+      <ViewT style={styles.content}>
         <Input
           label="Full Name"
           value={fullName}
@@ -27,7 +27,7 @@ export default function EditProfileModal() {
           placeholder="Full Name"
         />
 
-        <View style={styles.buttonContainer}>
+        <ViewT style={styles.buttonContainer}>
           <Button
             onPress={handleSave}
             disabled={loading}
@@ -41,9 +41,9 @@ export default function EditProfileModal() {
             variant="secondary"
             size="large"
           />
-        </View>
-      </View>
-    </View>
+        </ViewT>
+      </ViewT>
+    </ViewT>
   );
 }
 

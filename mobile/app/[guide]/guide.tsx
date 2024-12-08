@@ -4,9 +4,9 @@ import { useLocalSearchParams } from "expo-router";
 import { supabase } from "@/lib/supabaseClient";
 import {
   PageTitle,
-  ScrollView,
+  ScrollViewT,
   SecondaryText,
-  Text,
+  TextT,
 } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import Loading from "@/components/Loading";
@@ -127,16 +127,16 @@ const page = () => {
 
   return (
     <Suspense fallback={<Loading />}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollViewT contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <PageTitle>{info?.title}</PageTitle>
-          <Text>{info?.content}</Text>
+          <TextT>{info?.content}</TextT>
         </View>
         <View></View>
 
         {info?.materials !== null && (
           <View style={styles.materials}>
-            <Text style={styles.subTitle}>Materials</Text>
+            <TextT style={styles.subTitle}>Materials</TextT>
             {info?.materials.map((material: string) => {
               return <SecondaryText key={material}>{material}</SecondaryText>;
             })}
@@ -144,24 +144,24 @@ const page = () => {
         )}
         {info?.tools !== null && (
           <View style={styles.tools}>
-            <Text style={styles.subTitle}>Tools</Text>
+            <TextT style={styles.subTitle}>Tools</TextT>
             {info?.tools.map((tool: string) => {
               return <SecondaryText key={tool}>{tool}</SecondaryText>;
             })}
           </View>
         )}
         <View style={styles.steps}>
-          <Text style={styles.subTitle}>Steps</Text>
+          <TextT style={styles.subTitle}>Steps</TextT>
           {info?.steps.map((step: any) => {
             return (
               <View key={step.step} style={styles.stepContainer}>
                 <View style={styles.step}>
-                  <Text style={styles.stepNumber}>{step.step}.</Text>
-                  <Text style={styles.steptitle}>{step.description}</Text>
+                  <TextT style={styles.stepNumber}>{step.step}.</TextT>
+                  <TextT style={styles.steptitle}>{step.description}</TextT>
                 </View>
                 {step.materials.length > 0 && (
                   <View style={styles.stepMaterials}>
-                    <Text style={styles.stepsSubTitle}>Materials</Text>
+                    <TextT style={styles.stepsSubTitle}>Materials</TextT>
                     {step.materials.map((material: string) => {
                       return (
                         <SecondaryText key={material}>{material}</SecondaryText>
@@ -171,7 +171,7 @@ const page = () => {
                 )}
                 {step.tools.length > 0 && (
                   <View style={styles.stepTools}>
-                    <Text style={styles.stepsSubTitle}>Tools</Text>
+                    <TextT style={styles.stepsSubTitle}>Tools</TextT>
                     {step.tools.map((tool: string) => {
                       return <SecondaryText key={tool}>{tool}</SecondaryText>;
                     })}
@@ -183,13 +183,13 @@ const page = () => {
         </View>
         {info?.tips !== null && (
           <View style={styles.tips}>
-            <Text style={styles.subTitle}>Tips</Text>
+            <TextT style={styles.subTitle}>Tips</TextT>
             {info?.tips?.map((tip: string) => {
               return <SecondaryText key={tip}>{tip}</SecondaryText>;
             })}
           </View>
         )}
-      </ScrollView>
+      </ScrollViewT>
     </Suspense>
   );
 };

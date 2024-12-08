@@ -1,13 +1,13 @@
 import { supabase } from "../../../lib/supabaseClient";
-import { FlatList, ScrollView, StyleSheet } from "react-native";
+import { FlatList, ScrollView, StyleSheet, View } from "react-native";
 
 import { useEffect, useState } from "react";
 import { Tags } from "@/types/custom";
 import { Json } from "@/types/supabase";
 import CategorySuggestionCard from "@/components/CategorySuggestionCard";
-import { PageTitle, SecondaryText, Text, View } from "@/components/Themed";
+import { PageTitle, SecondaryText, TextT, ViewT } from "@/components/Themed";
 import { router } from "expo-router";
-import Colors from "@/constants/Colors";
+
 import { InlineButton } from "@/components/Button";
 import Loading from "@/components/Loading";
 
@@ -67,57 +67,57 @@ export default function CategoriesScreen() {
     func();
   }, []);
 
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <ScrollView
       style={styles.pageContainer}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      {loading ? (
-        <Loading />
-      ) : (
-        <View style={styles.container}>
-          <PageTitle style={styles.title}>Categories</PageTitle>
+      <ViewT style={styles.container}>
+        <PageTitle style={styles.title}>Categories</PageTitle>
 
-          {tags.map((tag: TagsType) => {
-            function capitalizeWords(name: string): string {
-              return name.replace(/\b\w/g, (char) => char.toUpperCase());
-            }
+        {tags.map((tag: TagsType) => {
+          function capitalizeWords(name: string): string {
+            return name.replace(/\b\w/g, (char) => char.toUpperCase());
+          }
 
-            return (
-              <View key={tag.id} style={styles.tagContainer}>
-                <View style={styles.tagHeader}>
-                  <SecondaryText style={styles.tagTitle}>
-                    {capitalizeWords(tag.name)}
-                  </SecondaryText>
-                  <InlineButton
-                    title="View All"
-                    onPress={() =>
-                      router.push({
-                        pathname: "/categories/[id]",
-                        params: {
-                          id: tag.id,
-                          title: capitalizeWords(tag.name),
-                        },
-                      })
-                    }
-                  />
-                </View>
-                <FlatList
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.flatlistContent}
-                  data={tag.guide_tags as GuideTagsWithGuides[]}
-                  keyExtractor={(item) => item.guide_id!.toString()}
-                  renderItem={({ item }) => (
-                    <CategorySuggestionCard guide={item.guides} />
-                  )}
+          return (
+            <View key={tag.id} style={styles.tagContainer}>
+              <View style={styles.tagHeader}>
+                <SecondaryText style={styles.tagTitle}>
+                  {capitalizeWords(tag.name)}
+                </SecondaryText>
+                <InlineButton
+                  title="View All"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/categories/[id]",
+                      params: {
+                        id: tag.id,
+                        title: capitalizeWords(tag.name),
+                      },
+                    })
+                  }
                 />
               </View>
-            );
-          })}
-        </View>
-      )}
+              <FlatList
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.flatlistContent}
+                data={tag.guide_tags as GuideTagsWithGuides[]}
+                keyExtractor={(item) => item.guide_id!.toString()}
+                renderItem={({ item }) => (
+                  <CategorySuggestionCard guide={item.guides} />
+                )}
+              />
+            </View>
+          );
+        })}
+      </ViewT>
     </ScrollView>
   );
 }

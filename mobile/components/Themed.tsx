@@ -35,7 +35,7 @@ export function useThemeColor(
   }
 }
 
-export function Text(props: TextProps & { bold?: boolean }) {
+export function TextT(props: TextProps & { bold?: boolean }) {
   const { style, lightColor, darkColor, bold, ...otherProps } = props;
   const color = useThemeColor(
     {
@@ -72,14 +72,14 @@ export function PageTitle(props: TextProps) {
     "text"
   );
   return (
-    <Text
+    <TextT
       style={[{ color }, style, { fontSize: 18, fontWeight: "bold" }]}
       {...otherProps}
     />
   );
 }
 
-export function View(props: ViewProps) {
+export function ViewT(props: ViewProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
   const backgroundColor = useThemeColor(
     { light: Colors.light.background, dark: Colors.dark.background },
@@ -89,7 +89,7 @@ export function View(props: ViewProps) {
   return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
 }
 
-export const ScrollView = (props: ScrollViewProps) => {
+export const ScrollViewT = (props: ScrollViewProps) => {
   const { style, lightColor, darkColor, ...otherProps } = props;
   const backgroundColor = useThemeColor(
     { light: Colors.light.background, dark: Colors.dark.background },

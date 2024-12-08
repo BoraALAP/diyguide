@@ -12,18 +12,20 @@ import {
 
 interface ButtonProps extends PressableProps {
   title: string;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "tertiary";
   size?: "small" | "medium" | "large";
 }
 
 export const Button = ({
   title,
   variant = "primary",
-  size = "medium",
+  size = "large",
   style,
   ...props
 }: ButtonProps) => {
   const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+
   const styles = StyleSheet.create({
     button: {
       borderRadius: 8,
@@ -31,12 +33,15 @@ export const Button = ({
       alignItems: "center",
     },
     primary: {
-      backgroundColor: Colors[colorScheme ?? "light"].tint,
+      backgroundColor: theme.tint,
     },
     secondary: {
       backgroundColor: "transparent",
       borderWidth: 1,
-      borderColor: Colors[colorScheme ?? "light"].tint,
+      borderColor: theme.tint,
+    },
+    tertiary: {
+      backgroundColor: "transparent",
     },
     small: {
       paddingVertical: 4,
@@ -55,10 +60,25 @@ export const Button = ({
       fontWeight: "600",
     },
     primaryText: {
-      color: Colors[colorScheme ?? "light"].background,
+      color: theme.background,
     },
     secondaryText: {
-      color: Colors[colorScheme ?? "light"].tint,
+      color: theme.tint,
+    },
+    tertiaryText: {
+      color: theme.tint,
+    },
+    disabledPrimary: {
+      backgroundColor: theme.disabledBackground,
+    },
+    disabledSecondary: {
+      borderColor: theme.disabledText,
+    },
+    disabledTertiary: {
+      // No background, only text color change
+    },
+    disabledText: {
+      color: theme.disabledText,
     },
   });
 
@@ -67,12 +87,27 @@ export const Button = ({
       style={[
         styles.button,
         styles[variant],
+        props.disabled &&
+          styles[
+            `disabled${variant.charAt(0).toUpperCase() + variant.slice(1)}` as
+              | "disabledPrimary"
+              | "disabledSecondary"
+              | "disabledTertiary"
+          ],
         styles[size],
         style as StyleProp<ViewStyle>,
       ]}
       {...props}
     >
-      <Text style={[styles.text, styles[`${variant}Text`]]}>{title}</Text>
+      <Text
+        style={[
+          styles.text,
+          styles[`${variant}Text`],
+          props.disabled && styles.disabledText,
+        ]}
+      >
+        {title}
+      </Text>
     </Pressable>
   );
 };

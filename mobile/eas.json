@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 5.9.1"
+    "appVersionSource": "remote"
   },
   "build": {
     "simulator": {
@@ -9,8 +9,8 @@
       "ios": {
         "simulator": true
       },
-      "env": {
-        "APP_ENV": "development"
+      "android": {
+        "buildType": "apk"
       }
     },
     "development": {
@@ -19,10 +19,14 @@
       "channel": "development",
       "env": {
         "APP_ENV": "development",
-        "EXPO_PUBLIC_ADMOBS_IOS": "ca-app-pub-6699425673576615~4871633472",
-        "EXPO_PUBLIC_ADMOBS_ANDROID": "ca-app-pub-6699425673576615~8767309166",
-        "EXPO_PUBLIC_ADMOBS_ADUNIT_IOS": "ca-app-pub-6699425673576615/8594148840",
-        "EXPO_PUBLIC_ADMOBS_ADUNIT_ANDROID": "ca-app-pub-6699425673576615/7785571422"
+        "APP_VARIANT": "development",
+        "EXPO_PUBLIC_SUPABASE_URL": "http://192.168.178.200:54321",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0",
+        "EXPO_PUBLIC_API_AUTH_KEY": "8f47e8c1-9b4a-4f8d-b7d5-e89c3f6d2a4e",
+        "EXPO_PUBLIC_BACKEND_URL": "http://localhost:3000",
+        "EXPO_PUBLIC_BUNDLE_ID": "com.boraalap.diyguide.development",
+        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_egaQtFczqHTXFRNGnntoTZhplLC",
+        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR"
       }
     },
     "preview": {
@@ -31,37 +35,33 @@
       "channel": "preview",
       "env": {
         "APP_ENV": "preview",
+        "APP_VARIANT": "preview",
         "EXPO_PUBLIC_SUPABASE_URL": "https://vixtnqangkibmfnhpily.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpeHRucWFuZ2tpYm1mbmhwaWx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE4MjI3NjcsImV4cCI6MjA0NzM5ODc2N30.XO2dfua_AcZ_CSDACjuiPLvZ8nNVYoMFxIDlcH_YQ0M",
         "EXPO_PUBLIC_API_AUTH_KEY": "8f47e8c1-9b4a-4f8d-b7d5-e89c3f6d2a4e",
         "EXPO_PUBLIC_BACKEND_URL": "https://diyguide.vercel.app",
-        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR",
+        "EXPO_PUBLIC_BUNDLE_ID": "com.boraalap.diyguide",
         "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_VQnUwsKGzAewRCjpkRWneyLeJTJ",
-        "EXPO_PUBLIC_ADMOBS_IOS": "ca-app-pub-6699425673576615~4871633472",
-        "EXPO_PUBLIC_ADMOBS_ANDROID": "ca-app-pub-6699425673576615~8767309166",
-        "EXPO_PUBLIC_ADMOBS_ADUNIT_IOS": "ca-app-pub-6699425673576615/8594148840",
-        "EXPO_PUBLIC_ADMOBS_ADUNIT_ANDROID": "ca-app-pub-6699425673576615/7785571422"
+        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR"
       }
     },
     "production": {
       "channel": "production",
+      "autoIncrement": true,
       "env": {
         "APP_ENV": "production",
+        "APP_VARIANT": "production",
         "EXPO_PUBLIC_SUPABASE_URL": "https://vixtnqangkibmfnhpily.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpeHRucWFuZ2tpYm1mbmhwaWx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE4MjI3NjcsImV4cCI6MjA0NzM5ODc2N30.XO2dfua_AcZ_CSDACjuiPLvZ8nNVYoMFxIDlcH_YQ0M",
         "EXPO_PUBLIC_API_AUTH_KEY": "8f47e8c1-9b4a-4f8d-b7d5-e89c3f6d2a4e",
         "EXPO_PUBLIC_BACKEND_URL": "https://diyguide.vercel.app",
-        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR",
+        "EXPO_PUBLIC_BUNDLE_ID": "com.boraalap.diyguide",
         "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_VQnUwsKGzAewRCjpkRWneyLeJTJ",
-        "EXPO_PUBLIC_ADMOBS_IOS": "ca-app-pub-6699425673576615~4871633472",
-        "EXPO_PUBLIC_ADMOBS_ANDROID": "ca-app-pub-6699425673576615~8767309166",
-        "EXPO_PUBLIC_ADMOBS_ADUNIT_IOS": "ca-app-pub-6699425673576615/8594148840",
-        "EXPO_PUBLIC_ADMOBS_ADUNIT_ANDROID": "ca-app-pub-6699425673576615/7785571422"
+        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR"
       }
     }
   },
   "submit": {
-    "production": {},
-    "simulator": {}
+    "production": {}
   }
 }

@@ -1,26 +1,42 @@
 import { ConfigContext, ExpoConfig } from "expo/config";
 
+const getBundleID = () => {
+  if (process.env.APP_VARIANT === "production") {
+    return "com.boraalap.diyguide";
+  }
+
+  if (process.env.APP_VARIANT === "preview") {
+    return "com.boraalap.diyguide.preview";
+  }
+
+  return "com.boraalap.diyguide.development";
+};
+
+const bundleID = getBundleID();
+
+const getAppName = () => {
+  if (process.env.APP_VARIANT === "production") {
+    return "DIY Guide";
+  }
+
+  if (process.env.APP_VARIANT === "preview") {
+    return "DIY Guide Preview";
+  }
+
+  return "DIY Guide Dev";
+};
+
+const appName = getAppName();
+
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const isProduction = process.env.APP_ENV === "production";
-  const isPreview = process.env.APP_ENV === "preview";
-
-  // Helper function to get the appropriate bundle identifier
-  const getBundleIdentifier = () => {
-    if (isProduction) {
-      return "com.boraalap.diyguide";
-    } else if (isPreview) {
-      return "com.boraalap.diyguide.preview";
-    }
-    return "com.boraalap.diyguide.development";
-  };
-
   return {
-    name: "diyguide",
+    ...config,
+    name: appName,
     slug: "diyguide",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
-    scheme: "myapp",
+    scheme: "com.diyguide",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     jsEngine: "hermes",
@@ -30,16 +46,18 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       backgroundColor: "#ffffff",
     },
     ios: {
-      // supportsTablet: true,
-      bundleIdentifier: getBundleIdentifier(),
-      buildNumber: "1.0.2",
+      bundleIdentifier: bundleID,
+      config: {
+        usesNonExemptEncryption: false,
+      },
     },
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff",
       },
-      package: getBundleIdentifier(),
+      package: bundleID,
+      versionCode: 5,
     },
     web: {
       bundler: "metro",
@@ -49,6 +67,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     plugins: [
       "expo-router",
       "expo-font",
+      "expo-build-properties",
     ],
     experiments: {
       typedRoutes: true,

@@ -4,7 +4,7 @@ import Purchases, {
   CustomerInfo,
   PurchasesPackage,
 } from "react-native-purchases";
-import { useAuth } from "./AuthProvider";
+import { useSupabase } from "./SupabaseProvider";
 
 interface RevenueContextType {
   loading: boolean;
@@ -20,7 +20,7 @@ const RevenueContext = createContext<RevenueContextType | undefined>(undefined);
 export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { updateProfile } = useAuth();
+  const { updateProfile } = useSupabase();
   const [loading, setLoading] = useState(false);
   // const [subscribed, setSubscribed] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>();
@@ -37,6 +37,7 @@ export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
         await Purchases.configure({
           apiKey: apiKey,
         });
+
         Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
         Purchases.addCustomerInfoUpdateListener((customerInfo) => {
           setCustomerInfo(customerInfo);
@@ -73,9 +74,17 @@ export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       await Purchases.purchasePackage(pack);
 
-      if (pack.product.identifier === "ten_token") {
+      if (
+        pack.product.identifier === "ten_token" ||
+        pack.product.identifier === "ios_ten_token" ||
+        pack.product.identifier === "android_ten_token"
+      ) {
         updateProfile({ tokens: 10 });
-      } else if (pack.product.identifier === "hundred_token") {
+      } else if (
+        pack.product.identifier === "hundred_token" ||
+        pack.product.identifier === "ios_hundred_token" ||
+        pack.product.identifier === "android_hundred_token"
+      ) {
         updateProfile({ tokens: 100 });
       }
       return true;

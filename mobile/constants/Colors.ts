@@ -17,6 +17,8 @@ export default {
     error: "rgba(255, 0, 0, 1)",
     selectedPackage: "rgba(255, 184, 168, 1)",
     selectedPackageBorder: tintColorLight,
+    disabledBackground: "rgba(224, 224, 224,1)",
+    disabledText: "rgba(160, 160, 160,1)",
   },
   dark: {
     text: "rgba(255, 255, 255, 1)",
@@ -33,5 +35,7 @@ export default {
     error: "rgba(255, 100, 100, 1)",
     selectedPackage: "rgba(78, 14, 0, 1)",
     selectedPackageBorder: tintColorDark,
+    disabledBackground: "rgba(74, 74, 74,1)",
+    disabledText: "rgba(122, 122, 122,1)",
   },
 };

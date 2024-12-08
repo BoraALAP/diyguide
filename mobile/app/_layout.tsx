@@ -14,7 +14,7 @@ import "../global.css";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { RevenueProvider } from "@/utils/RevenueProvider";
-import { AuthProvider } from "@/utils/AuthProvider";
+import { SupabaseProvider } from "@/utils/SupabaseProvider";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -58,7 +58,7 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <AuthProvider>
+      <SupabaseProvider>
         <RevenueProvider>
           <Stack screenOptions={{ headerBackButtonMenuEnabled: true }}>
             <Stack.Screen
@@ -88,11 +88,9 @@ function RootLayoutNav() {
                 },
               })}
             />
-
-            <Stack.Screen name="modal" options={{ presentation: "modal" }} />
           </Stack>
         </RevenueProvider>
-      </AuthProvider>
+      </SupabaseProvider>
     </ThemeProvider>
   );
 }

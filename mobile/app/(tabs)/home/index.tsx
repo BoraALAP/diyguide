@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { router } from "expo-router";
 
@@ -13,14 +14,14 @@ import { supabase } from "@/lib/supabaseClient";
 import { Guides } from "../../../types/custom";
 import SuggestionCard from "@/components/SuggestionCard";
 
-import { PageTitle, Text } from "@/components/Themed";
+import { PageTitle, ScrollViewT, TextT, ViewT } from "@/components/Themed";
 import InputWrapper from "@/components/InputWrapper";
 
-import { useAuth } from "@/utils/AuthProvider";
+import { useSupabase } from "@/utils/SupabaseProvider";
 import Loading from "@/components/Loading";
 
 const HomeScreen = ({ navigation }: { navigation: any }) => {
-  const { profile, removeToken } = useAuth();
+  const { profile, removeToken, initialized } = useSupabase();
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState<string | null>(null);
   const [error, setError] = useState<any>(null);
@@ -31,28 +32,37 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
     }
   );
   const [suggestions, setSuggestions] = useState<Guides[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const func = async () => {
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from("guides")
+      .select("id,title,steps")
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.log("error", error);
+
+      setError(error);
+    }
+    if (data) {
+      setSuggestions(data as Guides[]);
+    }
+    setLoading(false);
+    setRefreshing(false);
+  };
 
   useEffect(() => {
-    const func = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("guides")
-        .select("id,title,steps")
-        .order("created_at", { ascending: false })
-        .limit(10);
-
-      if (error) {
-        console.log("error", error);
-
-        setError(error);
-      }
-      if (data) {
-        setSuggestions(data as Guides[]);
-      }
-      setLoading(false);
-    };
     func();
   }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    func();
+  };
 
   const handleSearch = async (e: any) => {
     setLoading(true);
@@ -156,9 +166,17 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
 
   if (error) {
     return (
-      <View style={styles.pageCenter}>
-        <Text>Something is wrong</Text>
-      </View>
+      <>
+        <ScrollViewT
+          style={styles.pageCenter}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <TextT>{initialized ? "initialized" : "not initialized"}</TextT>
+          <TextT>Something is wrong,</TextT>
+        </ScrollViewT>
+      </>
     );
   }
 
@@ -167,16 +185,16 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <View style={styles.contentContainer}>
+      <ViewT style={styles.contentContainer}>
         {loading ? (
           <Loading />
         ) : search !== null && search !== "" ? (
           guides.notfound ? (
-            <View style={styles.pageCenter}>
-              <Text>No guides found</Text>
-            </View>
+            <ViewT style={styles.pageCenter}>
+              <TextT>No guides found</TextT>
+            </ViewT>
           ) : (
-            <View style={styles.pageContainer}>
+            <ViewT style={styles.pageContainer}>
               <PageTitle style={styles.title}>Search results</PageTitle>
               <FlatList
                 style={styles.flatlist}
@@ -187,11 +205,17 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
                   return <SuggestionCard guide={item} />;
                 }}
                 numColumns={2}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                  />
+                }
               />
-            </View>
+            </ViewT>
           )
         ) : (
-          <View style={styles.pageContainer}>
+          <ViewT style={styles.pageContainer}>
             <PageTitle style={styles.title}>Latest guides</PageTitle>
             <FlatList
               style={styles.flatlist}
@@ -203,8 +227,11 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
               }}
               numColumns={2}
               showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
             />
-          </View>
+          </ViewT>
         )}
         <InputWrapper
           search={search || ""}
@@ -212,7 +239,7 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
           guides={guides}
           handleGenerate={handleGenerate}
         />
-      </View>
+      </ViewT>
     </KeyboardAvoidingView>
   );
 };

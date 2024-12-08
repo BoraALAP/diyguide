@@ -1,7 +1,7 @@
 import { Link } from "expo-router";
 import React from "react";
 import { StyleSheet, Pressable } from "react-native";
-import { SecondaryText, Text, useCardStyles } from "./Themed";
+import { SecondaryText, TextT, useCardStyles } from "./Themed";
 
 const SuggestionCard = ({ guide }: { guide: any }) => {
   const cardStyles = useCardStyles();
@@ -14,7 +14,7 @@ const SuggestionCard = ({ guide }: { guide: any }) => {
       asChild
     >
       <Pressable style={cardStyles.card}>
-        <Text style={styles.title}>{guide.title}</Text>
+        <TextT style={styles.title}>{guide.title}</TextT>
 
         <SecondaryText>{guide.steps.length} steps</SecondaryText>
       </Pressable>

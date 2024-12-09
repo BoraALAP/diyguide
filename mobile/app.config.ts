@@ -9,7 +9,7 @@ const getBundleID = () => {
     return "com.boraalap.diyguide.preview";
   }
 
-  return "com.boraalap.diyguide.development";
+  return "com.boraalap.diyguide";
 };
 
 const bundleID = getBundleID();
@@ -23,7 +23,7 @@ const getAppName = () => {
     return "DIY Guide Preview";
   }
 
-  return "DIY Guide Dev";
+  return "DIY Guide D";
 };
 
 const appName = getAppName();
@@ -34,6 +34,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     name: appName,
     slug: "diyguide",
     version: "1.0.0",
+    runtimeVersion: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "com.diyguide",
@@ -57,7 +58,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         backgroundColor: "#ffffff",
       },
       package: bundleID,
-      versionCode: 5,
     },
     web: {
       bundler: "metro",
@@ -80,10 +80,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         projectId: "f4c0f14b-7975-46e8-85ff-1d5a031e2c2f",
       },
     },
-    runtimeVersion: {
-      policy: "appVersion",
-    },
+    // runtimeVersion: {
+    //   policy: "appVersion",
+    // },
     updates: {
+      enabled: true,
+      checkAutomatically: "ON_LOAD",
       url: "https://u.expo.dev/f4c0f14b-7975-46e8-85ff-1d5a031e2c2f",
     },
   };

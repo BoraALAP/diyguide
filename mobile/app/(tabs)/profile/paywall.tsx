@@ -10,7 +10,7 @@ import Purchases, {
 import { router } from "expo-router";
 import Colors from "@/constants/Colors";
 
-const PaywallScreen = () => {
+export default function PaywallScreen() {
   const colorScheme = useColorScheme();
   const [offerings, setOfferings] = useState<PurchasesOfferings | null>(null);
   const { loading, purchaseTokens } = useRevenue();
@@ -104,6 +104,4 @@ const PaywallScreen = () => {
       </ViewT>
     </ViewT>
   );
-};
-
-export default PaywallScreen;
+}

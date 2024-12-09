@@ -2,9 +2,8 @@ import { Slot, Stack } from "expo-router";
 import React from "react";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "react-native";
-import { Text } from "@/components/Themed";
 
-const _layout = () => {
+export default function _layout() {
   const colorScheme = useColorScheme();
 
   return (
@@ -43,6 +42,4 @@ const _layout = () => {
       />
     </Stack>
   );
-};
-
-export default _layout;
+}

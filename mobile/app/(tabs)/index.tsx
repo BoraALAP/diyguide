@@ -1,7 +1,6 @@
 // index.tsx
 import { Redirect } from "expo-router";
 
-const Index = () => {
+export default function Index() {
   return <Redirect href="/home" />;
-};
-export default Index;
+}

@@ -20,8 +20,8 @@ import InputWrapper from "@/components/InputWrapper";
 import { useSupabase } from "@/utils/SupabaseProvider";
 import Loading from "@/components/Loading";
 
-const HomeScreen = ({ navigation }: { navigation: any }) => {
-  const { profile, removeToken, initialized } = useSupabase();
+export default function HomeScreen() {
+  const { profile, removeToken } = useSupabase();
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState<string | null>(null);
   const [error, setError] = useState<any>(null);
@@ -119,46 +119,58 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
         ]
       );
     } else {
-      const apiKey = process.env.EXPO_PUBLIC_API_AUTH_KEY;
-      if (!apiKey) {
-        console.error("API key is missing");
-        return;
-      }
+      // const apiKey = process.env.EXPO_PUBLIC_API_AUTH_KEY;
+      // if (!apiKey) {
+      //   console.error("API key is missing");
+      //   return;
+      // }
 
-      const response = await fetch(
-        process.env.EXPO_PUBLIC_BACKEND_URL + "/api/generate-guide",
+      // const response = await fetch(
+      //   process.env.EXPO_PUBLIC_BACKEND_URL + "/api/generate-guide",
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       "x-api-key": apiKey,
+      //     },
+      //     body: JSON.stringify({
+      //       query: search,
+      //     }),
+      //   }
+      // );
+      // const { data, error } = await response.json();
+      // if (error) {
+      //   console.log("error", error);
+
+      //   setError(error);
+      //   return;
+      // }
+
+      // setSuggestions((prev) => [data, ...prev.slice(0, 9)]);
+      // setGuides({ guides: [], notfound: false });
+      // setSearch(null);
+
+      // if (await data.id) {
+      //   await removeToken();
+      //   router.push({
+      //     pathname: "/[guide]/guide",
+      //     params: { guide: await data.id },
+      //   });
+      // } else {
+      //   setError("Something went wrong");
+      // }
+
+      const { data, error } = await supabase.functions.invoke<{ data: string }>(
+        "openai",
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": apiKey,
-          },
-          body: JSON.stringify({
-            query: search,
-          }),
+          body: { query: search },
         }
       );
-      const { data, error } = await response.json();
-      if (error) {
-        console.log("error", error);
 
-        setError(error);
-        return;
-      }
+      console.log("data", data);
 
-      setSuggestions((prev) => [data, ...prev.slice(0, 9)]);
-      setGuides({ guides: [], notfound: false });
-      setSearch(null);
-
-      if (await data.id) {
-        await removeToken();
-        router.push({
-          pathname: "/[guide]/guide",
-          params: { guide: await data.id },
-        });
-      } else {
-        setError("Something went wrong");
-      }
+      if (error) throw error;
+      return data?.data; // The AI response
     }
 
     setLoading(false);
@@ -173,7 +185,6 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
-          <TextT>{initialized ? "initialized" : "not initialized"}</TextT>
           <TextT>Something is wrong,</TextT>
         </ScrollViewT>
       </>
@@ -242,7 +253,7 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
       </ViewT>
     </KeyboardAvoidingView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   pageContainer: { gap: 16 },
@@ -270,5 +281,3 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
 });
-
-export default HomeScreen;

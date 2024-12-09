@@ -4,9 +4,9 @@ import { StyleSheet, View, AppState } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
+import * as Linking from "expo-linking";
 import { supabase } from "@/lib/supabaseClient";
-import { TextT, ViewT } from "./Themed";
+import { ScrollViewT, TextT, ViewT } from "./Themed";
 import Input from "./Input";
 import { Button } from "./Button";
 import { useSupabase } from "@/utils/SupabaseProvider";
@@ -28,8 +28,20 @@ AppState.addEventListener("change", (state) => {
 });
 
 export default function Auth() {
-  const { signInWithPassword, signUp, loading, performOAuth, sendMagicLink } =
-    useSupabase();
+  const {
+    signInWithPassword,
+    signUp,
+    loading,
+    performOAuth,
+    sendMagicLink,
+    createSessionFromUrl,
+  } = useSupabase();
+
+  // this needs to in the auth component, if it is not it just loops the create session from url function
+
+  const url = Linking.useURL();
+  console.log("url", url);
+  if (url) createSessionFromUrl(url);
 
   const {
     control,
@@ -54,6 +66,7 @@ export default function Auth() {
   };
 
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [usePassword, setUsePassword] = useState(false);
 
   const onSendMagicLink = async (email: string) => {
     const res = await sendMagicLink(email);
@@ -61,78 +74,112 @@ export default function Auth() {
   };
 
   return (
-    <ViewT style={styles.container}>
-      <View style={styles.inputs}>
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Input
-              label="Email"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              keyboardType="email-address"
-              placeholder="email@address.com"
-              autoCapitalize={"none"}
-              error={errors.email?.message}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Input
-              label="Password"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              keyboardType="default"
-              secureTextEntry={true}
-              placeholder="Password"
-              autoCapitalize={"none"}
-              error={errors.password?.message}
-            />
-          )}
-        />
-      </View>
-      <View style={styles.topButtons}>
-        <Button
-          title="Sign in"
-          onPress={handleSubmit(onSubmit)}
-          disabled={loading || !isFormValid}
-        />
-
-        <Button
-          title="Sign up"
-          disabled={loading || !isFormValid}
-          variant="secondary"
-          onPress={handleSubmit((data) => signUp(data.email, data.password))}
-        />
-      </View>
-
-      <View style={styles.bottomButtons}>
-        {magicLinkSent ? (
-          <View style={styles.magicLinkSent}>
-            <TextT bold>Check your email for the magic link.</TextT>
-          </View>
-        ) : (
-          <Button
-            onPress={async () => {
-              const email = getValues("email");
-              if (email) {
-                await onSendMagicLink(email);
-              }
-            }}
-            title="Send Magic Link"
-            variant="secondary"
-            disabled={!emailValue || magicLinkSent}
+    <ScrollViewT contentContainerStyle={styles.scrollViewContent}>
+      <View style={styles.container}>
+        <View style={styles.inputs}>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label="Email"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                keyboardType="email-address"
+                placeholder="email@address.com"
+                autoCapitalize={"none"}
+                error={errors.email?.message}
+              />
+            )}
           />
+
+          {usePassword && (
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Password"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  keyboardType="default"
+                  secureTextEntry={true}
+                  placeholder="Password"
+                  autoCapitalize={"none"}
+                  error={errors.password?.message}
+                />
+              )}
+            />
+          )}
+        </View>
+
+        {usePassword && (
+          <View style={styles.topButtons}>
+            <Button
+              title="Sign in"
+              onPress={handleSubmit(onSubmit)}
+              disabled={loading || !isFormValid}
+            />
+
+            <Button
+              title="Sign up"
+              disabled={loading || !isFormValid}
+              variant="secondary"
+              onPress={handleSubmit((data) =>
+                signUp(data.email, data.password)
+              )}
+            />
+          </View>
         )}
-      </View>
-      <View style={styles.bottomButtons}>
+
+        {!usePassword && (
+          <View style={styles.bottomButtons}>
+            {magicLinkSent ? (
+              <View style={styles.magicLinkSent}>
+                <TextT bold>Check your email for the magic link.</TextT>
+              </View>
+            ) : (
+              <Button
+                onPress={async () => {
+                  const email = getValues("email");
+                  if (email) {
+                    await onSendMagicLink(email);
+                  }
+                }}
+                title="Continue with Magic Link"
+                variant="primary"
+                disabled={!emailValue || magicLinkSent}
+              />
+            )}
+          </View>
+        )}
+
+        <View style={styles.orContainer}>
+          <View style={styles.orLine} />
+        </View>
+
+        <View style={styles.bottomButtons}>
+          {usePassword ? (
+            <Button
+              onPress={async () => {
+                setUsePassword(false);
+              }}
+              title="Sign In with Magic Link"
+              variant="secondary"
+            />
+          ) : (
+            <Button
+              onPress={async () => {
+                setUsePassword(true);
+              }}
+              title="Sign In with Password"
+              variant="secondary"
+            />
+          )}
+        </View>
+
         <View style={styles.orContainer}>
           <View style={styles.orLine} />
           <TextT bold style={styles.orText}>
@@ -140,21 +187,29 @@ export default function Auth() {
           </TextT>
           <View style={styles.orLine} />
         </View>
-        <Button
-          onPress={() => performOAuth("github")}
-          title="Sign in with Github"
-          variant="tertiary"
-        />
+
+        <View style={styles.bottomButtons}>
+          <Button
+            onPress={() => performOAuth("github")}
+            title="Sign in with Github"
+            variant="tertiary"
+          />
+        </View>
       </View>
-    </ViewT>
+    </ScrollViewT>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
   container: {
+    flex: 1,
+    justifyContent: "center",
     marginTop: 40,
-    padding: 12,
-    gap: 16,
+    padding: 24,
   },
   inputs: {
     flexDirection: "column",
@@ -165,8 +220,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   bottomButtons: {
-    alignItems: "center",
-    gap: 12,
+    gap: 16,
   },
   orText: {
     textAlign: "center",
@@ -179,6 +233,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    marginVertical: 24,
   },
   orLine: {
     flex: 1,

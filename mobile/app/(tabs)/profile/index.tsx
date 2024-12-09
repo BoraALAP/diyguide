@@ -1,19 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Image } from "react-native";
+import { Image } from "react-native";
 import { router } from "expo-router";
 import * as Updates from "expo-updates";
+import { StyleSheet, View } from "react-native";
 
 import Auth from "@/components/Auth";
 import { Button } from "@/components/Button";
-import { ViewT, PageTitle, SecondaryText, TextT } from "@/components/Themed";
+import {
+  ViewT,
+  PageTitle,
+  SecondaryText,
+  ScrollViewT,
+} from "@/components/Themed";
 import PurchaseButton from "@/components/PurchaseButton";
 import { useSupabase } from "@/utils/SupabaseProvider";
 
-const ProfileScreen = () => {
+export default function ProfileScreen() {
   const { profile, loading, signOut } = useSupabase();
 
   return (
-    <ViewT style={styles.container}>
+    <>
       {!profile ? (
         <Auth />
       ) : (
@@ -48,30 +53,21 @@ const ProfileScreen = () => {
             <Button
               onPress={signOut}
               disabled={loading}
-              title={loading ? "Signing out..." : "Sign Out"}
+              title={"Sign Out"}
               variant="secondary"
               size="large"
             />
           </ViewT>
         </ViewT>
       )}
-      <ViewT style={styles.versionContainer}>
-        <SecondaryText>{Updates.runtimeVersion}</SecondaryText>
-        <SecondaryText>{Updates.updateId}</SecondaryText>
-      </ViewT>
-    </ViewT>
+    </>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    padding: 20,
-    height: "100%",
-  },
   profileContainer: {
     gap: 24,
+    paddingHorizontal: 24,
     flex: 1,
     paddingTop: 100,
   },
@@ -86,20 +82,18 @@ const styles = StyleSheet.create({
     borderRadius: 40,
   },
   userInfo: {
-    flex: 1,
     gap: 4,
   },
   buttonContainer: {
     gap: 12,
     position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 24,
+    left: 24,
+    right: 24,
   },
   versionContainer: {
+    marginTop: 24,
     gap: 4,
     alignItems: "center",
   },
 });
-
-export default ProfileScreen;

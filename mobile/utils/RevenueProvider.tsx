@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { Platform } from "react-native";
+import { Alert, Platform } from "react-native";
 import Purchases, {
   CustomerInfo,
   PurchasesPackage,
@@ -76,20 +76,24 @@ export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (
         pack.product.identifier === "ten_token" ||
-        pack.product.identifier === "ios_ten_token" ||
-        pack.product.identifier === "android_ten_token"
+        pack.product.identifier === "ios_ten_tokens" ||
+        pack.product.identifier === "android_ten_tokens"
       ) {
         updateProfile({ tokens: 10 });
       } else if (
         pack.product.identifier === "hundred_token" ||
-        pack.product.identifier === "ios_hundred_token" ||
-        pack.product.identifier === "android_hundred_token"
+        pack.product.identifier === "ios_hundred_tokens" ||
+        pack.product.identifier === "android_hundred_tokens"
       ) {
         updateProfile({ tokens: 100 });
       }
       return true;
     } catch (error) {
       console.error("Error purchasing tokens", error);
+      Alert.alert(
+        "You didn't complete the purchase",
+        "Please give it another try"
+      );
       return false;
     } finally {
       setLoading(false);

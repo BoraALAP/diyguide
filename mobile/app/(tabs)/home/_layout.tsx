@@ -3,7 +3,7 @@ import React from "react";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "react-native";
 
-const _layout = () => {
+export default function _layout() {
   const colorScheme = useColorScheme();
 
   return (
@@ -26,6 +26,4 @@ const _layout = () => {
       />
     </Stack>
   );
-};
-
-export default _layout;
+}

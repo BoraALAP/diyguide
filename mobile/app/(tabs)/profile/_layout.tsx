@@ -4,7 +4,7 @@ import Colors from "@/constants/Colors";
 import { Pressable, useColorScheme } from "react-native";
 import { TextT } from "@/components/Themed";
 
-const _layout = () => {
+export default function _layout() {
   const colorScheme = useColorScheme();
 
   return (
@@ -55,6 +55,4 @@ const _layout = () => {
       />
     </Stack>
   );
-};
-
-export default _layout;
+}

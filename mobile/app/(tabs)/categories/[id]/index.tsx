@@ -4,10 +4,10 @@ import { useLocalSearchParams } from "expo-router";
 import { supabase } from "@/lib/supabaseClient";
 import { Guides } from "@/types/custom";
 import SuggestionCard from "@/components/SuggestionCard";
-import { PageTitle, Text } from "@/components/Themed";
+import { PageTitle, TextT } from "@/components/Themed";
 import Loading from "@/components/Loading";
 
-const CategoryGuidesScreen = () => {
+export default function CategoryGuidesScreen() {
   const { id } = useLocalSearchParams();
   const [loading, setLoading] = useState(false);
   const [guides, setGuides] = useState<Partial<Guides>[]>([]);
@@ -47,7 +47,7 @@ const CategoryGuidesScreen = () => {
   if (error) {
     return (
       <View style={styles.pageCenter}>
-        <Text>Something went wrong</Text>
+        <TextT>Something went wrong</TextT>
       </View>
     );
   }
@@ -64,7 +64,7 @@ const CategoryGuidesScreen = () => {
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -85,5 +85,3 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
 });
-
-export default CategoryGuidesScreen;

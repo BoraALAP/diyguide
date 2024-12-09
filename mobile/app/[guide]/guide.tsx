@@ -100,7 +100,7 @@ const getThemedStyles = (colorScheme: "light" | "dark" | null) => {
   });
 };
 
-const page = () => {
+export default function GuidePage() {
   const { guide } = useLocalSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<any>(null);
@@ -192,6 +192,4 @@ const page = () => {
       </ScrollViewT>
     </Suspense>
   );
-};
-
-export default page;
+}

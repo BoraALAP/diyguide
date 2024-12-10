@@ -123,7 +123,7 @@ const useSupabaseProvider = () => {
 
   // Decrements the user's token count
   const removeToken = async () => {
-    if (!session?.user || !profile?.tokens || profile.tokens <= 0) return;
+    if (!session?.user || !profile?.tokens || profile.tokens === 0) return;
     setLoading(true);
     try {
       const updatedData = {
@@ -136,6 +136,8 @@ const useSupabaseProvider = () => {
         .update(updatedData)
         .eq("id", session.user.id)
         .select("*");
+
+      console.log("remove token", data);
 
       if (error) throw error;
       setProfile(data[0]);

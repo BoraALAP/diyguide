@@ -10,11 +10,13 @@ const InputWrapper = ({
   handleSearch,
   guides,
   handleGenerate,
+  generating,
 }: {
   search: string;
   handleSearch: (text: string) => void;
   guides: { notfound?: boolean };
   handleGenerate: () => void;
+  generating: boolean;
 }) => {
   const backgroundColor = useThemeColor(
     {
@@ -35,8 +37,18 @@ const InputWrapper = ({
         placeholder="Search for guides.."
         value={search || ""}
         onChangeText={(e) => handleSearch(e)}
+        returnKeyLabel="Generate"
+        returnKeyType="done"
+        onSubmitEditing={handleGenerate}
       />
-      {guides.notfound && <Button title="Generate" onPress={handleGenerate} />}
+      {guides.notfound && (
+        <Button
+          title="Generate"
+          size="medium"
+          onPress={handleGenerate}
+          disabled={generating}
+        />
+      )}
     </BlurView>
   );
 };

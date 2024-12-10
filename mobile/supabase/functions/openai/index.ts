@@ -69,7 +69,6 @@ serve(async (req: Request) => {
   // Intentionally log the query
 
   const sanitizedQuery = query.trim();
-  console.log({ sanitizedQuery });
 
   try {
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
@@ -163,7 +162,6 @@ serve(async (req: Request) => {
       },
     });
   } catch (error) {
-    console.error("Error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: error.message === "Unauthorized" ? 401 : 500,
       headers: {

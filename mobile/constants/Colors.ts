@@ -1,5 +1,5 @@
-const tintColorDark = "rgba(255, 87, 51, 1)";
 const tintColorLight = "rgba(204, 36, 0, 1)";
+const tintColorDark = "rgba(255, 87, 51, 1)";
 
 export default {
   light: {
@@ -10,7 +10,7 @@ export default {
     tabIconDefault: "rgba(180, 180, 180, 1)",
     tabIconSelected: tintColorLight,
     cardBackground: "rgba(255, 255, 255, 1)",
-    sectionBackground: "rgba(230, 230, 230, 1)",
+    sectionBackground: "rgba(243, 235, 233, 1)",
     inputBackground: "rgba(255, 255, 255, 0.75)",
     border: "rgba(200, 200, 200, 1)",
     headerBackground: "rgba(255, 255, 255, 0.55)",
@@ -28,7 +28,7 @@ export default {
     tabIconDefault: "rgba(200, 200, 200, 1)",
     tabIconSelected: tintColorDark,
     cardBackground: "rgba(48,48,48,1)",
-    sectionBackground: "rgba(48,48,48,1)",
+    sectionBackground: "rgba(43,28,25,1)",
     inputBackground: "rgba(24, 24, 24, 0.75)",
     border: "rgba(100, 100, 100, 1)",
     headerBackground: "rgba(0, 0, 0, 0.55)",

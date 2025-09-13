@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+echo "[pre-install] Enabling Corepack"
+corepack enable || true
+echo "[pre-install] Yarn currently: $(yarn --version 2>/dev/null || echo 'not available yet')"

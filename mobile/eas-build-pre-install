@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
-echo "[pre-install] Enabling Corepack"
-corepack enable || true
-echo "[pre-install] Yarn currently: $(yarn --version 2>/dev/null || echo 'not available yet')"
+echo "[mobile pre-install] Enabling Corepack"
+if command -v corepack >/dev/null 2>&1; then
+  corepack enable || true
+else
+  echo "Corepack not found in PATH"
+fi
+echo "[mobile pre-install] Yarn: $(yarn --version 2>/dev/null || echo 'unavailable')"
+

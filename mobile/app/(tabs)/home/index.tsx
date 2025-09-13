@@ -120,10 +120,7 @@ export default function HomeScreen() {
       );
     } else {
       setGenerating(true);
-      const {
-        data: { data },
-        error,
-      } = await supabase.functions.invoke("openai", {
+      const { data: resp, error } = await supabase.functions.invoke("openai", {
         body: { query: search },
       });
 
@@ -136,23 +133,33 @@ export default function HomeScreen() {
         console.log("Fetch error:", error.message);
       }
 
+      if (error) {
+        // Stop early if invoke failed; avoid destructuring null
+        setGenerating(false);
+        setLoading(false);
+        throw error;
+      }
+
+      const data = resp?.data; // function returns { data: guideData }
+
       console.log("data", data);
-      setSuggestions((prev) => [data, ...prev.slice(0, 9)]);
+      if (data) {
+        setSuggestions((prev) => [data, ...prev.slice(0, 9)]);
+      }
       setGuides({ guides: [], notfound: false });
       setSearch(null);
       setGenerating(false);
-      if (await data.id) {
+      if (data?.id) {
         await removeToken();
         router.push({
           pathname: "/[guide]/guide",
-          params: { guide: await data.id },
+          params: { guide: String(data.id) },
         });
       } else {
         setError("Something went wrong");
       }
-      if (error) throw error;
       setLoading(false);
-      return data?.data; // The AI response
+      return data; // The AI response
     }
   };
 

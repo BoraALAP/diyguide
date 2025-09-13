@@ -40,7 +40,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     scheme: "com.diyguide",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
-    jsEngine: "hermes",
     splash: {
       image: "./assets/images/splash.png",
       resizeMode: "contain",

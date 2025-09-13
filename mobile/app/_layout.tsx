@@ -53,37 +53,37 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <SupabaseProvider>
-        <RevenueProvider>
-          <Stack screenOptions={{ headerBackButtonMenuEnabled: true }}>
-            <Stack.Screen
-              name="(tabs)"
-              options={{
-                headerShown: false,
-                title: "",
-                contentStyle: {
-                  backgroundColor: Colors[colorScheme ?? "light"].background,
-                },
-              }}
-            />
-            <Stack.Screen
-              name="[guide]"
-              options={({ route }) => ({
-                title: (route.params as { title?: string })?.title || "Guide",
-                headerShadowVisible: false,
-                headerTransparent: true,
-                headerBlurEffect: "regular",
+        {/* <RevenueProvider> */}
+        <Stack screenOptions={{ headerBackButtonMenuEnabled: true }}>
+          <Stack.Screen
+            name="(tabs)"
+            options={{
+              headerShown: false,
+              title: "",
+              contentStyle: {
+                backgroundColor: Colors[colorScheme ?? "light"].background,
+              },
+            }}
+          />
+          <Stack.Screen
+            name="[guide]"
+            options={({ route }) => ({
+              title: (route.params as { title?: string })?.title || "Guide",
+              headerShadowVisible: false,
+              headerTransparent: true,
+              headerBlurEffect: "regular",
 
-                headerStyle: {
-                  backgroundColor:
-                    Colors[colorScheme ?? "light"].headerBackground,
-                },
-                contentStyle: {
-                  backgroundColor: Colors[colorScheme ?? "light"].background,
-                },
-              })}
-            />
-          </Stack>
-        </RevenueProvider>
+              headerStyle: {
+                backgroundColor:
+                  Colors[colorScheme ?? "light"].headerBackground,
+              },
+              contentStyle: {
+                backgroundColor: Colors[colorScheme ?? "light"].background,
+              },
+            })}
+          />
+        </Stack>
+        {/* </RevenueProvider> */}
       </SupabaseProvider>
     </ThemeProvider>
   );

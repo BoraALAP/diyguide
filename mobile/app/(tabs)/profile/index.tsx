@@ -29,10 +29,9 @@ export default function ProfileScreen() {
                 profile?.avatar_url
                   ? { uri: profile.avatar_url }
                   : {
-                      uri: `https://avatar.vercel.sh/${
-                        profile?.full_name ? profile?.full_name : "rauchg"
+                    uri: `https://avatar.vercel.sh/${profile?.full_name ? profile?.full_name : "rauchg"
                       }`,
-                    }
+                  }
               }
               style={styles.avatar}
             />
@@ -41,7 +40,7 @@ export default function ProfileScreen() {
               <SecondaryText>Available Tokens: {profile.tokens}</SecondaryText>
             </ViewT>
           </ViewT>
-          <PurchaseButton />
+          {/* <PurchaseButton /> */}
 
           <ViewT style={styles.buttonContainer}>
             <Button

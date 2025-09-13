@@ -1,0 +1,17 @@
+project_id = "supabase"
+
+[db]
+major_version = 15
+# Use non-default ports to avoid conflicts on 54322/54320
+port = 54328
+shadow_port = 54326
+
+# You can also customize other service ports if needed:
+# [api]
+# port = 54321
+# [studio]
+# port = 54323
+# [rest]
+# port = 54324
+# [realtime]
+# port = 54325

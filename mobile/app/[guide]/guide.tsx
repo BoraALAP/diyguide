@@ -1,5 +1,5 @@
 import React, { Suspense, useState, useEffect } from "react";
-import { View, StyleSheet, useColorScheme } from "react-native";
+import { View, StyleSheet, useColorScheme, Image } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { supabase } from "@/lib/supabaseClient";
 import {
@@ -83,6 +83,12 @@ const getThemedStyles = (colorScheme: "light" | "dark" | null) => {
       alignItems: "flex-start",
       gap: 8,
     },
+    stepImage: {
+      width: "100%",
+      height: 200,
+      borderRadius: 12,
+      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
+    },
     stepContainer: {
       rowGap: 8,
 
@@ -115,6 +121,7 @@ export default function GuidePage() {
         .select("*")
         .eq("id", guide)
         .single();
+      console.log(data);
 
       setInfo(data);
       setError(error);
@@ -124,6 +131,27 @@ export default function GuidePage() {
   }, []);
 
   const styles = getThemedStyles(colorScheme ?? "light");
+
+  const fixImageUrl = (uri: string | undefined | null) => {
+    if (!uri) return uri;
+    try {
+      const u = new URL(uri);
+      // Replace internal hosts like 'kong' with our public base
+      const base = process.env.EXPO_PUBLIC_SUPABASE_URL;
+      if (!base) return uri;
+      const b = new URL(base);
+      // If uri host is different from base or missing expected port, align origin
+      if (u.hostname !== b.hostname || (b.port && u.port !== b.port)) {
+        u.protocol = b.protocol;
+        u.hostname = b.hostname;
+        u.port = b.port; // may be empty for 80/443, which is fine for HTTPS in prod
+        return u.toString();
+      }
+      return uri;
+    } catch {
+      return uri;
+    }
+  };
 
   return (
     <Suspense fallback={<Loading />}>
@@ -159,6 +187,13 @@ export default function GuidePage() {
                   <TextT style={styles.stepNumber}>{step.step}.</TextT>
                   <TextT style={styles.steptitle}>{step.description}</TextT>
                 </View>
+                {step.image_url ? (
+                  <Image
+                    source={{ uri: fixImageUrl(step.image_url) || undefined }}
+                    style={styles.stepImage}
+                    resizeMode="cover"
+                  />
+                ) : null}
                 {step.materials.length > 0 && (
                   <View style={styles.stepMaterials}>
                     <TextT style={styles.stepsSubTitle}>Materials</TextT>

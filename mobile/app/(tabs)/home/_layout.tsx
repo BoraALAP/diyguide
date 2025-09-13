@@ -13,7 +13,7 @@ export default function _layout() {
         options={{
           title: "Home",
           headerShown: false,
-          headerBlurEffect: "systemUltraThinMaterialLight",
+          headerBlurEffect: "regular",
           headerShadowVisible: false,
           headerTransparent: true,
           headerStyle: {

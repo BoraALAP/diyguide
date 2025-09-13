@@ -40,7 +40,10 @@ export default function CategoriesScreen() {
   useEffect(() => {
     const func = async () => {
       setLoading(true);
-      const { data, error } = await supabase.from("tags").select(`
+      const { data, error } = await supabase
+        .from("tags")
+        .select(
+          `
           *,
           guide_tags!inner (
             *,
@@ -50,17 +53,14 @@ export default function CategoriesScreen() {
               steps
             )
           )
-        `);
-
+        `
+        )
+        .order("name", { ascending: true });
       if (error) {
         setError(error);
       }
       if (data) {
-        setTags(
-          (data as unknown as TagsType[]).sort((a, b) =>
-            a.name.localeCompare(b.name)
-          )
-        );
+        setTags(data);
       }
       setLoading(false);
     };
@@ -91,24 +91,26 @@ export default function CategoriesScreen() {
                 <SecondaryText style={styles.tagTitle}>
                   {capitalizeWords(tag.name)}
                 </SecondaryText>
-                <InlineButton
-                  title="View All"
-                  onPress={() =>
-                    router.push({
-                      pathname: "/categories/[id]",
-                      params: {
-                        id: tag.id,
-                        title: capitalizeWords(tag.name),
-                      },
-                    })
-                  }
-                />
+                {tag.guide_tags.length > 4 && (
+                  <InlineButton
+                    title="View All"
+                    onPress={() =>
+                      router.push({
+                        pathname: "/categories/[id]",
+                        params: {
+                          id: tag.id,
+                          title: capitalizeWords(tag.name),
+                        },
+                      })
+                    }
+                  />
+                )}
               </View>
               <FlatList
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.flatlistContent}
-                data={tag.guide_tags as GuideTagsWithGuides[]}
+                data={tag.guide_tags.slice(0, 4) as GuideTagsWithGuides[]}
                 keyExtractor={(item) => item.guide_id!.toString()}
                 renderItem={({ item }) => (
                   <CategorySuggestionCard guide={item.guides} />

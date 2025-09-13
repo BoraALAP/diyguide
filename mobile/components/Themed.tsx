@@ -116,7 +116,7 @@ export const useCardStyles = () => {
       padding: 16,
       elevation: 1,
       boxShadow: "0px 0px 10px 0px rgba(0, 0, 0, 0.1)",
-      flex: 1,
+      // flex: 1,
       marginHorizontal: 8,
       borderRadius: 8,
       backgroundColor,

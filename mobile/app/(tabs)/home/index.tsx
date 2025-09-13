@@ -16,7 +16,6 @@ import SuggestionCard from "@/components/SuggestionCard";
 
 import { PageTitle, ScrollViewT, TextT, ViewT } from "@/components/Themed";
 import InputWrapper from "@/components/InputWrapper";
-import { Button } from "@/components/Button";
 
 import { useSupabase } from "@/utils/SupabaseProvider";
 import Loading from "@/components/Loading";
@@ -36,59 +35,38 @@ export default function HomeScreen() {
       notfound: false,
     }
   );
-  const [suggestions, setSuggestions] = useState<Guides[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
-  const [page, setPage] = useState(0);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [suggestions, setSuggestions] = useState<Partial<Guides>[]>([]);
 
-  const fetchGuides = useCallback(
-    async (page: number) => {
-      setLoading(true);
+  const fetchData = async () => {
+    setLoading(true);
 
-      const { data, error } = await supabase
-        .from("guides")
-        .select("id,title,steps")
-        .order("created_at", { ascending: false })
-        .range(page * 10, (page + 1) * 10 - 1);
+    const { data: newData, error } = await supabase
+      .from("guides")
+      .select("id,title,steps")
+      .order("created_at", { ascending: false })
+      .limit(20);
 
-      if (error) {
-        console.log("error", error);
-        setError(error);
-      }
-      if (data) {
-        setSuggestions((prev) => [...prev, ...data] as Guides[]);
-      }
-      setLoading(false);
-      setLoadingMore(false);
-      setRefreshing(false);
-    },
-    [setSuggestions, setLoading, setLoadingMore, setRefreshing, setError]
-  );
+    if (error) {
+      console.error("Error fetching data:", error.message);
+      Alert.alert("Error fetching data:", error.message);
+    } else {
+      setSuggestions(newData);
+    }
 
-  useEffect(() => {
-    fetchGuides(page);
-  }, [page, fetchGuides]);
-
-  useEffect(() => {
-    console.log("Suggestions updated:", suggestions);
-  }, [suggestions]);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    setPage(0);
-    setSuggestions([]);
-    fetchGuides(0);
+    setLoading(false);
   };
 
-  const handleLoadMore = () => {
-    if (!loadingMore) {
-      setLoadingMore(true);
-      setPage((prevPage) => prevPage + 1);
-    }
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const onRefresh = async () => {
+    setLoading(true);
+    await fetchData();
+    setLoading(false);
   };
 
   const handleSearch = async (e: any) => {
-    setLoading(true);
     setSearch(e);
     const { data, error } = await supabase
       .from("guides")
@@ -100,7 +78,6 @@ export default function HomeScreen() {
     if (data?.length === 0) {
       setGuides({ guides: [], notfound: true });
     } else setGuides({ guides: data as Guides[], notfound: false });
-    setLoading(false);
   };
 
   const handleGenerate = async () => {
@@ -179,13 +156,17 @@ export default function HomeScreen() {
     }
   };
 
+  if (loading) {
+    return <Loading />;
+  }
+
   if (error) {
     return (
       <>
         <ScrollViewT
           style={styles.pageScrollContainer}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl refreshing={loading} onRefresh={onRefresh} />
           }
         >
           <ViewT style={styles.pageCenter}>
@@ -221,14 +202,6 @@ export default function HomeScreen() {
                   return <SuggestionCard guide={item} />;
                 }}
                 numColumns={2}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                  />
-                }
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
               />
             </ViewT>
           )
@@ -239,17 +212,15 @@ export default function HomeScreen() {
               style={styles.flatlist}
               contentContainerStyle={styles.content}
               data={suggestions}
-              keyExtractor={(item) => item.id.toString()}
+              keyExtractor={(item) => item?.id?.toString() || ""}
               renderItem={({ item }) => {
                 return <SuggestionCard guide={item} />;
               }}
               numColumns={2}
               showsVerticalScrollIndicator={false}
               refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                <RefreshControl refreshing={loading} onRefresh={onRefresh} />
               }
-              onEndReached={handleLoadMore}
-              onEndReachedThreshold={0.5}
             />
           </ViewT>
         )}

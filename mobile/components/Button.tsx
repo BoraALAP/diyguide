@@ -12,7 +12,7 @@ import {
 
 interface ButtonProps extends PressableProps {
   title: string;
-  variant?: "primary" | "secondary" | "tertiary";
+  variant?: "primary" | "secondary" | "tertiary" | "destructive";
   size?: "small" | "medium" | "large";
 }
 
@@ -77,8 +77,14 @@ export const Button = ({
     disabledTertiary: {
       // No background, only text color change
     },
+    destructive: {
+      backgroundColor: theme.error,
+    },
     disabledText: {
       color: theme.disabledText,
+    },
+    destructiveText: {
+      color: theme.background,
     },
   });
 

@@ -29,6 +29,7 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme();
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
@@ -48,12 +49,6 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
-
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
@@ -76,7 +71,7 @@ function RootLayoutNav() {
                 title: (route.params as { title?: string })?.title || "Guide",
                 headerShadowVisible: false,
                 headerTransparent: true,
-                headerBlurEffect: "systemUltraThinMaterialLight",
+                headerBlurEffect: "regular",
 
                 headerStyle: {
                   backgroundColor:

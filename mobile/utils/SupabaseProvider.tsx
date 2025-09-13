@@ -32,6 +32,7 @@ type SupabaseContextType = {
   signOut: () => Promise<void>;
   removeToken: () => Promise<void>;
   createSessionFromUrl: (url: string) => Promise<Session | null | undefined>;
+  deleteUser: () => Promise<void>;
 };
 
 // Create a context for Supabase
@@ -53,6 +54,23 @@ const useSupabaseProvider = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        if (session?.user) getProfile(session.user.id);
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   // Creates a session from the URL after OAuth redirect
   const createSessionFromUrl = async (url: string) => {
@@ -282,6 +300,20 @@ const useSupabaseProvider = () => {
     }
   };
 
+  const deleteUser = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.rpc("delete_user_account");
+      if (error) throw error;
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Return the context value with all state and functions
   return {
     profile,
@@ -297,6 +329,7 @@ const useSupabaseProvider = () => {
     signOut,
     removeToken,
     createSessionFromUrl,
+    deleteUser,
   };
 };
 

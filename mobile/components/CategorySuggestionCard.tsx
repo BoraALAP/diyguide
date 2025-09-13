@@ -22,7 +22,7 @@ const CategorySuggestionCard = ({ guide }: { guide: any }) => {
 };
 
 const styles = StyleSheet.create({
-  card: { maxWidth: 200 },
+  card: { width: 200, height: "100%" },
   title: { fontWeight: "bold", marginBottom: 5 },
 });
 

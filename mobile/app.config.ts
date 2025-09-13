@@ -34,7 +34,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     name: appName,
     slug: "diyguide",
     version: "1.0.0",
-    runtimeVersion: "1.0.0",
+    // runtimeVersion: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "com.diyguide",
@@ -48,9 +48,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     ios: {
       bundleIdentifier: bundleID,
+      usesAppleSignIn: true,
       config: {
         usesNonExemptEncryption: false,
       },
+      // Next Release Needs to be this
+      // buildNumber: "6.0.2",
     },
     android: {
       adaptiveIcon: {
@@ -68,6 +71,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       "expo-router",
       "expo-font",
       "expo-build-properties",
+      "expo-apple-authentication",
     ],
     experiments: {
       typedRoutes: true,
@@ -80,9 +84,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         projectId: "f4c0f14b-7975-46e8-85ff-1d5a031e2c2f",
       },
     },
-    // runtimeVersion: {
-    //   policy: "appVersion",
-    // },
+    runtimeVersion: {
+      policy: "appVersion",
+    },
     updates: {
       enabled: true,
       checkAutomatically: "ON_LOAD",

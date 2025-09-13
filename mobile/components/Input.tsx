@@ -17,20 +17,31 @@ function Input({ label, error, ...props }: InputProps) {
     { light: Colors.light.text, dark: Colors.dark.text },
     "text"
   );
+
+  const disabledColor = useThemeColor(
+    { light: Colors.light.disabledText, dark: Colors.dark.disabledText },
+    "disabledText"
+  );
   const borderColor = useThemeColor(
     { light: Colors.light.border, dark: Colors.dark.border },
     "border"
   );
 
+  const editable = props.editable ?? true;
+
   return (
     <View style={styles.container}>
-      <TextT style={styles.label}>{label}</TextT>
+      <TextT
+        style={[styles.label, { color: editable ? textColor : disabledColor }]}
+      >
+        {label}
+      </TextT>
       <TextInput
         style={[
           styles.input,
           {
             backgroundColor,
-            color: textColor,
+            color: editable ? textColor : disabledColor,
             borderColor: error ? Colors.light.error : borderColor,
           },
         ]}

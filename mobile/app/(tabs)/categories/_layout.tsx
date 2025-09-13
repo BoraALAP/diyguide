@@ -13,7 +13,7 @@ export default function _layout() {
         options={{
           title: "Categories",
           headerShown: false,
-          headerBlurEffect: "systemUltraThinMaterialLight",
+          headerBlurEffect: "regular",
           headerShadowVisible: false,
           headerTransparent: true,
           headerStyle: {
@@ -29,7 +29,7 @@ export default function _layout() {
         name="[id]"
         options={({ route }) => ({
           title: (route.params as { title?: string })?.title || "Category",
-          headerBlurEffect: "systemUltraThinMaterialLight",
+          headerBlurEffect: "regular",
           headerShadowVisible: false,
           headerTransparent: true,
           headerStyle: {

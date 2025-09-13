@@ -37,9 +37,7 @@ const InputWrapper = ({
         placeholder="Search for guides.."
         value={search || ""}
         onChangeText={(e) => handleSearch(e)}
-        returnKeyLabel="Generate"
         returnKeyType="done"
-        onSubmitEditing={handleGenerate}
       />
       {guides.notfound && (
         <Button

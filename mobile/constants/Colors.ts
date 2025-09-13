@@ -1,5 +1,5 @@
-const tintColorLight = "rgba(204, 36, 0, 1)";
-const tintColorDark = "rgba(255, 87, 51, 1)";
+const tintColorLight = "rgba(0, 130, 168, 1)";
+const tintColorDark = "rgba(92, 217, 255, 1)";
 
 export default {
   light: {
@@ -10,12 +10,12 @@ export default {
     tabIconDefault: "rgba(180, 180, 180, 1)",
     tabIconSelected: tintColorLight,
     cardBackground: "rgba(255, 255, 255, 1)",
-    sectionBackground: "rgba(243, 235, 233, 1)",
+    sectionBackground: "rgba(183, 238, 255, 1)",
     inputBackground: "rgba(255, 255, 255, 0.75)",
     border: "rgba(200, 200, 200, 1)",
-    headerBackground: "rgba(255, 255, 255, 0.55)",
+    headerBackground: "rgba(255, 255, 255, 0.25)",
     error: "rgba(255, 0, 0, 1)",
-    selectedPackage: "rgba(255, 184, 168, 1)",
+    selectedPackage: "rgba(183, 238, 255, 1)",
     selectedPackageBorder: tintColorLight,
     disabledBackground: "rgba(224, 224, 224,1)",
     disabledText: "rgba(160, 160, 160,1)",
@@ -28,12 +28,12 @@ export default {
     tabIconDefault: "rgba(200, 200, 200, 1)",
     tabIconSelected: tintColorDark,
     cardBackground: "rgba(48,48,48,1)",
-    sectionBackground: "rgba(43,28,25,1)",
+    sectionBackground: "rgba(0,67,87,1)",
     inputBackground: "rgba(24, 24, 24, 0.75)",
     border: "rgba(100, 100, 100, 1)",
-    headerBackground: "rgba(0, 0, 0, 0.55)",
+    headerBackground: "rgba(0, 0, 0, 0.25)",
     error: "rgba(255, 100, 100, 1)",
-    selectedPackage: "rgba(78, 14, 0, 1)",
+    selectedPackage: "rgba(0, 98, 128, 1)",
     selectedPackageBorder: tintColorDark,
     disabledBackground: "rgba(74, 74, 74,1)",
     disabledText: "rgba(122, 122, 122,1)",

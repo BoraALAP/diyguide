@@ -13,7 +13,7 @@ const SuggestionCard = ({ guide }: { guide: any }) => {
       }}
       asChild
     >
-      <Pressable style={cardStyles.card}>
+      <Pressable style={{ ...styles.card, ...cardStyles.card }}>
         <TextT style={styles.title}>{guide.title}</TextT>
 
         <SecondaryText>{guide.steps.length} steps</SecondaryText>
@@ -24,6 +24,7 @@ const SuggestionCard = ({ guide }: { guide: any }) => {
 
 const styles = StyleSheet.create({
   title: { fontWeight: "bold", marginBottom: 5 },
+  card: { flex: 1 },
 });
 
 export default SuggestionCard;

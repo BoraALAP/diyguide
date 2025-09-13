@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { StyleSheet, View, AppState } from "react-native";
-
+import { StyleSheet, View, AppState, Platform } from "react-native";
+import * as AppleAuthentication from "expo-apple-authentication";
+import * as Updates from "expo-updates";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import * as Linking from "expo-linking";
 import { supabase } from "@/lib/supabaseClient";
-import { ScrollViewT, TextT, ViewT } from "./Themed";
+import { ScrollViewT, SecondaryText, TextT, ViewT } from "./Themed";
 import Input from "./Input";
 import { Button } from "./Button";
 import { useSupabase } from "@/utils/SupabaseProvider";
@@ -194,7 +195,57 @@ export default function Auth() {
             title="Sign in with Github"
             variant="tertiary"
           />
+
+          {Platform.OS === "ios" && (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={
+                AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
+              }
+              buttonStyle={
+                AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+              }
+              cornerRadius={8}
+              style={styles.appleButton}
+              onPress={async () => {
+                try {
+                  const credential = await AppleAuthentication.signInAsync({
+                    requestedScopes: [
+                      AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                      AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                    ],
+                  });
+                  // Sign in via Supabase Auth.
+                  if (credential.identityToken) {
+                    const {
+                      error,
+                      data: { user },
+                    } = await supabase.auth.signInWithIdToken({
+                      provider: "apple",
+                      token: credential.identityToken,
+                    });
+                    console.log(JSON.stringify({ error, user }, null, 2));
+                    if (!error) {
+                      // User is signed in.
+                    }
+                  } else {
+                    throw new Error("No identityToken.");
+                  }
+                } catch (e: any) {
+                  if (e.code === "ERR_REQUEST_CANCELED") {
+                    // handle that the user canceled the sign-in flow
+                    console.log(e);
+                  } else {
+                    // handle other errors
+                    console.log(e);
+                  }
+                }
+              }}
+            />
+          )}
         </View>
+      </View>
+      <View style={styles.versionContainer}>
+        <SecondaryText>update Id: {Updates.updateId}</SecondaryText>
       </View>
     </ScrollViewT>
   );
@@ -221,6 +272,11 @@ const styles = StyleSheet.create({
   },
   bottomButtons: {
     gap: 16,
+    justifyContent: "center",
+  },
+  appleButton: {
+    width: "100%",
+    height: 48,
   },
   orText: {
     textAlign: "center",
@@ -239,5 +295,9 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 1,
     backgroundColor: "#ccc",
+  },
+  versionContainer: {
+    alignItems: "center",
+    paddingVertical: 12,
   },
 });

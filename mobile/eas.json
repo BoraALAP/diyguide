@@ -4,6 +4,7 @@
   },
   "build": {
     "simulator": {
+      "node": "20.11.1",
       "developmentClient": true,
       "distribution": "internal",
       "env": {
@@ -22,6 +23,7 @@
       }
     },
     "development": {
+      "node": "20.11.1",
       "distribution": "internal",
       "developmentClient": true,
       "channel": "development",
@@ -36,6 +38,7 @@
       }
     },
     "preview": {
+      "node": "20.11.1",
       "distribution": "internal",
       "channel": "preview",
       "env": {
@@ -49,6 +52,7 @@
       }
     },
     "production": {
+      "node": "20.11.1",
       "distribution": "store",
       "channel": "production",
       "autoIncrement": true,

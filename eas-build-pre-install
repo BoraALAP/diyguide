@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-echo "[root pre-install] Enabling Corepack globally"
-command -v corepack >/dev/null 2>&1 || { echo "Corepack not found in PATH"; exit 0; }
-corepack enable || true
-echo "[root pre-install] Yarn: $(yarn --version 2>/dev/null || echo 'unavailable')"
-

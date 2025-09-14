@@ -8,18 +8,22 @@ import {
   StyleProp,
   ViewStyle,
   useColorScheme,
+  ActivityIndicator,
 } from "react-native";
+import Typography from "./Typography";
 
 interface ButtonProps extends PressableProps {
   title: string;
   variant?: "primary" | "secondary" | "tertiary" | "destructive";
   size?: "small" | "medium" | "large";
+  loading?: boolean;
 }
 
 export const Button = ({
   title,
   variant = "primary",
   size = "large",
+  loading = false,
   style,
   ...props
 }: ButtonProps) => {
@@ -88,6 +92,19 @@ export const Button = ({
     },
   });
 
+  const getTextWeight = () => {
+    switch (size) {
+      case "small":
+        return "medium";
+      case "medium":
+        return "semiBold";
+      case "large":
+        return "bold";
+      default:
+        return "semiBold";
+    }
+  };
+
   return (
     <Pressable
       style={[
@@ -103,17 +120,30 @@ export const Button = ({
         styles[size],
         style as StyleProp<ViewStyle>,
       ]}
+      disabled={props.disabled || loading}
       {...props}
     >
-      <Text
-        style={[
-          styles.text,
-          styles[`${variant}Text`],
-          props.disabled && styles.disabledText,
-        ]}
-      >
-        {title}
-      </Text>
+      {loading ? (
+        <ActivityIndicator
+          size="small"
+          color={variant === "primary" || variant === "destructive" ? theme.background : theme.tint}
+        />
+      ) : (
+        <Typography
+          variant="button"
+          weight={getTextWeight() as any}
+          color={
+            props.disabled
+              ? theme.disabledText
+              : variant === "primary" || variant === "destructive"
+              ? theme.background
+              : theme.tint
+          }
+          font="lexend"
+        >
+          {title}
+        </Typography>
+      )}
     </Pressable>
   );
 };

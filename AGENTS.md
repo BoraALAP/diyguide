@@ -1,49 +1,52 @@
 # Repository Guidelines
 
-## Overview & Capabilities
-- DIYGuide is a monorepo with a mobile app (Expo/React Native) and a web backend (Next.js). Core capabilities:
-  - Browse curated DIY guides by category and view guide details.
-  - Authenticate with Supabase (email/3rd-party where configured) and manage a profile.
-  - Paywall/subscription support via RevenueCat (purchase and entitlement checks).
-  - Typed Supabase client usage across the stack, with generated TypeScript types.
+This guide helps contributors work efficiently across mobile, backend, and Supabase code in this monorepo.
 
-## Architecture
-- Mobile (`mobile/`): Expo Router structure in `app/` with tabs for `home`, `categories`, and `profile`. UI in `components/`, state/providers in `utils/` (`SupabaseProvider.tsx`, `RevenueProvider.tsx`), types in `types/`, assets in `assets/`.
-- Backend (`backend/`): Next.js (App Router) under `src/app`. Tailwind CSS in `src/app/globals.css`. Supabase SSR helpers in `src/utils/supabase/`.
-- Configuration: `mobile/app.config.ts`, `backend/next.config.ts`.
-- Environment: `mobile/.env.local`, `mobile/.env.production`, `backend/.env` (never commit secrets).
+## Project Structure & Module Organization
+- `mobile/` (Expo/React Native)
+  - Routes in `app/` (`(tabs)/home`, `categories`, `profile`)
+  - UI in `components/`, providers in `utils/`, types in `types/`, assets in `assets/`
+- `backend/` (Next.js App Router)
+  - App in `src/app`, styles in `src/app/globals.css`, Supabase SSR utils in `src/utils/supabase/`
+- `supabase/`
+  - Edge Functions in `functions/`, SQL in `migrations/`, local env in `.env.local`, optional `config.toml`
+- Tests: colocate in `*.test.ts(x)` or `__tests__/` under `mobile/`.
 
-## Key Flows
-- Onboarding/Auth: App initializes providers, checks session (Supabase); unauthenticated users are prompted to sign in (Apple/email where enabled).
-- Guide Browsing: `home` and `categories` routes query Supabase via `mobile/lib/supabaseClient.ts`; cards navigate to detail screens.
-- Subscription: `PurchaseButton` + `RevenueProvider` trigger RevenueCat purchase, then entitlement gates access (e.g., `profile/paywall.tsx`).
-- Profile: Edit profile data under `app/(tabs)/profile/`; persisted via Supabase.
+## Build, Test, and Development Commands
+- Mobile (npm only)
+  - `cd mobile && npm i` — install deps
+  - `npm run start` — Expo dev server
+  - `npm run ios` / `npm run android` — run on simulator/device
+  - `npm test` — run Jest (jest-expo)
+  - `npm run supagenlocal` — generate `types/supabase.ts`
+- Backend (npm only)
+  - `cd backend && npm i && npm run dev` — local dev
+  - `npm run build && npm start` — prod build/start
+  - `npm run lint` — lint
+- Supabase local
+  - `supabase start` — start services
+  - `supabase db reset` — recreate tables
+  - Serve function: from repo root `supabase functions serve openai --env-file ./supabase/.env.local`
+  - Deploy: `supabase functions deploy openai --project-ref <ref>` then set secrets
 
-## Build, Test, and Development
-- Mobile (use Yarn):
-  - `cd mobile && yarn` – install deps; `yarn start` – Expo dev client.
-  - Targets: `yarn ios` / `yarn android` / `yarn web`.
-  - Tests: `yarn test` (jest-expo). Types: `yarn supagenlocal` → `types/supabase.ts`.
-  - OTA update: `yarn publishprod` (EAS Update to production channel).
-- Backend (use npm):
-  - `cd backend && npm i` – install; `npm run dev` – dev server.
-  - `npm run build && npm start` – production build/serve; `npm run lint` – ESLint.
+## Coding Style & Naming Conventions
+- TypeScript everywhere; 2-space indent; Prettier configured via `.prettierrc`.
+- Components `PascalCase` (e.g., `GuideCard.tsx`); hooks/utils `camelCase`.
+- Routes follow Expo/Next conventions.
+- Mobile styling: Tailwind via NativeWind (`className` on RN components). Config at `mobile/tailwind.config.js`; Babel plugin in `mobile/babel.config.js`.
 
-## Coding Style & Tests
-- TypeScript; 2-space indentation; Prettier formatting (`.prettierrc`).
-- Naming: Components `PascalCase` (e.g., `GuideCard.tsx`); hooks/utils `camelCase`; routes follow Expo/Next conventions.
-- Tests (mobile): `*.test.ts(x)` beside source or in `__tests__/`; prefer RTL patterns and deterministic tests. Backend tests not configured—add per feature if needed.
+## Testing Guidelines
+- Mobile: React Testing Library patterns; deterministic tests; colocate as `*.test.ts(x)` or `__tests__/`.
+- Backend: tests not preconfigured—add per feature as needed.
+- Run with `cd mobile && npm test`.
 
-## Local Dev & Release Workflow
-- Local: set env files, install per package, start services (mobile and/or backend).
-- Before PR: run tests, lint backend, verify purchase flow in sandbox, and refresh Supabase types if schema changed.
-- Release: use EAS Update for OTA mobile updates; deploy backend build to a Next.js-compatible host.
-
-## Security & Configuration
-- Keep API keys and service secrets in env files only; rotate if leaked.
-- Supabase: mobile client in `mobile/lib/supabaseClient.ts`, SSR in `backend/src/utils/supabase/`.
-- Package managers: Yarn in `mobile/`, npm in `backend/`—do not mix.
+## Security & Configuration Tips
+- Do not commit secrets. Use env files:
+  - `mobile/.env.local`, `mobile/.env.production`, `backend/.env`, `supabase/.env.local`
+- Keys: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, optional `ENABLE_IMAGE_GEN`.
+- For local images, set `PUBLIC_SUPABASE_URL` to LAN URL (e.g., `http://192.168.x.x:54321`).
 
 ## Commit & Pull Request Guidelines
-- Commits: imperative mood with optional scope, e.g., `mobile: fix purchase button`, `backend: add auth middleware`.
-- PRs: clear summary, linked issues (`Closes #123`), screenshots for UI changes, steps to test, and any env/config notes.
+- Commits: imperative with optional scope, e.g., `mobile: add guide card`, `backend: fix auth redirect`.
+- PRs: describe changes, link issues (`Closes #123`), include screenshots for UI, steps to test, and any env/config notes.
+- Before opening: run tests and lint; ensure commands above succeed.

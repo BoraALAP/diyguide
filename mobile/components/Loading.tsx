@@ -1,20 +1,12 @@
 import React from "react";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 
 const Loading: React.FC = () => {
   return (
-    <View style={styles.container}>
+    <View className="flex-1 items-center justify-center">
       <ActivityIndicator size="large" />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
 
 export default Loading;

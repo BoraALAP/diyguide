@@ -27,14 +27,14 @@ const getAppName = () => {
 };
 
 const appName = getAppName();
+const appVersion = process.env.APP_VERSION ?? "1.0.1";
 
 export default ({ config }: ConfigContext): ExpoConfig => {
   return {
     ...config,
     name: appName,
     slug: "diyguide",
-    version: "1.0.0",
-    // runtimeVersion: "1.0.0",
+    version: appVersion,
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "com.diyguide",
@@ -84,9 +84,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         projectId: "f4c0f14b-7975-46e8-85ff-1d5a031e2c2f",
       },
     },
-    runtimeVersion: {
-      policy: "appVersion",
-    },
+    // Bare workflow doesn't support runtime policies, so mirror the app version.
+    runtimeVersion: appVersion,
     updates: {
       enabled: true,
       checkAutomatically: "ON_LOAD",

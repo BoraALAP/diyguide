@@ -5,7 +5,28 @@ VALUES
   ('woodworking'),
   ('painting'),
   ('plumbing'),
-  ('electrical')
+  ('electrical'),
+  ('home repair'),
+  ('gardening'),
+  ('outdoor living'),
+  ('upcycling'),
+  ('organization'),
+  ('decor craft'),
+  ('lighting'),
+  ('furniture diy'),
+  ('kids projects'),
+  ('holiday decor'),
+  ('pet projects'),
+  ('smart home'),
+  ('sewing'),
+  ('baking tools'),
+  ('masonry'),
+  ('flooring'),
+  ('eco friendly'),
+  ('bathroom refresh'),
+  ('kitchen upgrades'),
+  ('storage hacks'),
+  ('landscaping')
 ON CONFLICT DO NOTHING;
 
 -- Guide 1: Simple Bookshelf
@@ -106,4 +127,3 @@ SELECT gen_random_uuid(), g.id, NULL, 5, 'Great starter project!'
 FROM public.guides g
 WHERE g.title = 'Build a Simple Bookshelf'
 ON CONFLICT DO NOTHING;
-

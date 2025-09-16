@@ -95,9 +95,7 @@ export default function CategoriesScreen() {
   return (
     <ScrollView
       style={{ paddingTop: insets.top }}
-      contentContainerStyle={
-        styles.scrollView
-      }
+      contentContainerStyle={styles.scrollView}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={loading} onRefresh={onRefresh} />
@@ -124,9 +122,9 @@ export default function CategoriesScreen() {
 
 const styles = StyleSheet.create({
   scrollView: {
-    flex: 1,
     paddingHorizontal: 16, // px-4 from Figma
-    gap: 16,
+    paddingBottom: 24,
+    rowGap: 16,
   },
 
 

@@ -1,6 +1,27 @@
 -- Helpers to compute relative luminance and contrast to black/white
 set check_function_bodies = off;
 
+-- Ensure pgcrypto before using gen_random_bytes
+create extension if not exists pgcrypto with schema extensions;
+
+-- Helper to safely produce a 6-char hex string regardless of pgcrypto schema
+create or replace function public.random_hex6()
+returns text
+language plpgsql
+as $$
+declare
+  bytes bytea;
+begin
+  begin
+    bytes := extensions.gen_random_bytes(3);
+  exception
+    when undefined_function then
+      bytes := gen_random_bytes(3);
+  end;
+  return substring(encode(bytes, 'hex') from 1 for 6);
+end;
+$$;
+
 create or replace function public.hex_rel_luminance(hex text)
 returns double precision language sql immutable as $$
   with b as (
@@ -40,7 +61,7 @@ begin
   ) loop
     tries := 0;
     loop
-      candidate := substring(encode(gen_random_bytes(3), 'hex') from 1 for 6);
+      candidate := public.random_hex6();
       exit when public.hex_contrast_ok(candidate)
              and not exists (select 1 from public.tags where lower(hex_code) = lower(candidate));
       tries := tries + 1;
@@ -49,4 +70,3 @@ begin
     update public.tags set hex_code = candidate where id = rec.id;
   end loop;
 end $$;
-

@@ -1,3 +1,7 @@
+/**
+ * useClientOnlyValue (web) returns a server value until hydration, then swaps
+ * to the client value to avoid SSR mismatches.
+ */
 import React from 'react';
 
 // `useEffect` is not invoked during server rendering, meaning

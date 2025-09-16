@@ -1,14 +1,19 @@
+/**
+ * GuideSection wraps a titled block of guides, handling the header and card
+ * styling while wiring presses through to the parent.
+ */
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import Typography from "./Typography";
 import GuideItem from "./GuideItem";
-import Colors from "@/constants/Colors";
-import { useColorScheme } from "./useColorScheme";
+import { PageTitle } from "./PageTitle";
+import { Card } from "./Card";
+import Typography from "./Typography";
 
 interface Guide {
   id: string;
   name: string;
-  // category: string;
+  category?: string;
+  tags?: { name: string; hex?: string }[];
   steps: number;
   selected?: boolean;
   colorIndicator?: string;
@@ -27,52 +32,34 @@ const GuideSection: React.FC<GuideSectionProps> = ({
   guides,
   onGuidePress,
 }) => {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+
+
 
   return (
     <View style={styles.container}>
       {/* Section Header */}
-      <View style={styles.header}>
-        <Typography
-          variant="h2"
-          color={colors.text}
-          style={styles.title}
-        >
-          {title}
-        </Typography>
-        <Typography
-          variant="body"
-          weight="regular"
-          font="literata"
-          color="#4b4b4b"
-          style={styles.subtitle}
-        >
-          {subtitle}
-        </Typography>
-      </View>
+      <PageTitle title={title} description={subtitle} />
 
       {/* Guides List */}
-      <View
-        style={[
-          styles.guidesContainer,
-          {
-            backgroundColor: colors.cardBackground,
-          },
-        ]}
-      >
+      <Card>
+        {guides.length === 0 && (
+          <Typography
+            variant="h5"
+          >No Guide is Found</Typography>
+        )}
         {guides.map((guide) => (
           <GuideItem
             key={guide.id}
             guideName={guide.name}
-            // category={guide.category}
+            category={guide.category}
+            tags={guide.tags}
             stepAmount={`${guide.steps} step${guide.steps !== 1 ? "s" : ""}`}
             selected={guide.selected}
             colorIndicator={guide.colorIndicator}
             onPress={() => onGuidePress?.(guide)}
           />
         ))}
-      </View>
+      </Card>
     </View>
   );
 };
@@ -81,24 +68,7 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     gap: 16,
-  },
-  header: {
-    paddingHorizontal: 16,
-    gap: 4,
-  },
-  title: {
-    width: "100%",
-  },
-  subtitle: {
-    width: "100%",
-  },
-  guidesContainer: {
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
-    overflow: "hidden",
-  },
+  }
 });
 
 export default GuideSection;

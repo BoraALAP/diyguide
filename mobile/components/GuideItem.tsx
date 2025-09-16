@@ -1,3 +1,7 @@
+/**
+ * GuideItem shows a guide title, up to three tags (or category), and the step
+ * count. Use in richer guide lists such as home sections.
+ */
 import React from "react";
 import { View, Pressable, StyleSheet, PressableProps } from "react-native";
 import Typography from "./Typography";
@@ -6,7 +10,8 @@ import { useColorScheme } from "./useColorScheme";
 
 interface GuideItemProps extends Omit<PressableProps, "style"> {
   guideName?: string;
-  category?: string;
+  category?: string; // legacy single category
+  tags?: { name: string; hex?: string }[]; // new multi-tag chips
   stepAmount?: string;
   selected?: boolean;
   colorIndicator?: string;
@@ -17,6 +22,7 @@ interface GuideItemProps extends Omit<PressableProps, "style"> {
 const GuideItem: React.FC<GuideItemProps> = ({
   guideName = "Name of the guide",
   category = "Category",
+  tags,
   stepAmount = "7 steps",
   selected = false,
   colorIndicator = "#cc0055",
@@ -31,14 +37,7 @@ const GuideItem: React.FC<GuideItemProps> = ({
     <Pressable
       {...props}
       style={({ pressed }) => [
-        styles.container,
-        {
-          backgroundColor: selected ? colors.selectedPackage : "transparent",
-          borderLeftWidth: selected ? 4 : 0,
-          borderLeftColor: selected ? colors.tint : "transparent",
-        },
-        pressed && styles.pressed,
-        style,
+        styles.container
       ]}
     >
       <View style={styles.content}>
@@ -54,20 +53,55 @@ const GuideItem: React.FC<GuideItemProps> = ({
         <View style={styles.infoContainer}>
           {showCategoryContainer && (
             <View style={styles.categoryContainer}>
-              <View
-                style={[
-                  styles.colorIndicator,
-                  { backgroundColor: colorIndicator },
-                ]}
-              />
-              <Typography
-                variant="captionSm"
-                color={colors.secondaryText}
-                style={styles.category}
-                numberOfLines={1}
-              >
-                {category}
-              </Typography>
+              {Array.isArray(tags) && tags.length > 0 ? (
+                <>
+                  {tags.slice(0, 2).map((t, idx) => (
+                    <View key={`${t.name}-${idx}`} style={[styles.chip]}>
+                      <View
+                        style={[
+                          styles.colorIndicator,
+                          { backgroundColor: t.hex ? `#${String(t.hex).replace(/^#/, "")}` : colorIndicator },
+                        ]}
+                      />
+                      <Typography
+                        variant="captionSm"
+                        color={colors.secondaryText}
+                        style={styles.category}
+                        numberOfLines={1}
+                      >
+                        {t.name}
+                      </Typography>
+                    </View>
+                  ))}
+                  {tags.length > 2 && (
+                    <Typography
+                      variant="captionSm"
+                      color={colors.secondaryText}
+                      style={styles.moreChip}
+                      numberOfLines={1}
+                    >
+                      +{tags.length - 2} more
+                    </Typography>
+                  )}
+                </>
+              ) : (
+                <View style={styles.chip}>
+                  <View
+                    style={[
+                      styles.colorIndicator,
+                      { backgroundColor: colorIndicator },
+                    ]}
+                  />
+                  <Typography
+                    variant="captionSm"
+                    color={colors.secondaryText}
+                    style={styles.category}
+                    numberOfLines={1}
+                  >
+                    {category}
+                  </Typography>
+                </View>
+              )}
             </View>
           )}
 
@@ -90,7 +124,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   content: {
-    paddingHorizontal: 12,
+
     paddingVertical: 4,
     gap: 2,
   },
@@ -99,17 +133,22 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
     justifyContent: "space-between",
     width: "100%",
     gap: 16,
   },
   categoryContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    minWidth: 0,
+    flexShrink: 1,
+    flexGrow: 0,
     gap: 8,
+  },
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexShrink: 1,
+    gap: 6
   },
   colorIndicator: {
     width: 8,
@@ -121,9 +160,13 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
   },
+  moreChip: {
+    flexShrink: 0,
+  },
   stepAmount: {
     textAlign: "right",
     flexShrink: 0,
+    paddingBottom: 1,
   },
   pressed: {
     opacity: 0.7,

@@ -1,144 +1,131 @@
-import Colors from "@/constants/Colors";
+/**
+ * Button is the shared pressable CTA with theme-aware variants, sizes, and
+ * loading state. Use wherever a consistent app button is needed.
+ */
 import React from "react";
-import {
-  Pressable,
-  Text,
-  StyleSheet,
-  PressableProps,
-  StyleProp,
-  ViewStyle,
-  useColorScheme,
-  ActivityIndicator,
-} from "react-native";
+import { Pressable, PressableProps, StyleSheet, ActivityIndicator } from "react-native";
 import Typography from "./Typography";
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "./useColorScheme";
 
-interface ButtonProps extends PressableProps {
-  title: string;
+interface ButtonProps extends Omit<PressableProps, "style"> {
+  title?: string;
+  loading?: boolean;
+  disabled?: boolean;
   variant?: "primary" | "secondary" | "tertiary" | "destructive";
   size?: "small" | "medium" | "large";
-  loading?: boolean;
+  style?: any;
 }
 
-export const Button = ({
-  title,
-  variant = "primary",
-  size = "large",
+const Button: React.FC<ButtonProps> = ({
+  title = "Generate",
   loading = false,
+  disabled = false,
+  variant = "primary",
+  size = "medium",
   style,
+  onPress,
   ...props
-}: ButtonProps) => {
+}) => {
   const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+  const colors = Colors[colorScheme ?? "light"];
 
-  const styles = StyleSheet.create({
-    button: {
-      borderRadius: 8,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    primary: {
-      backgroundColor: theme.tint,
-    },
-    secondary: {
-      backgroundColor: "transparent",
-      borderWidth: 1,
-      borderColor: theme.tint,
-    },
-    tertiary: {
-      backgroundColor: "transparent",
-    },
-    small: {
-      paddingVertical: 4,
-      paddingHorizontal: 8,
-    },
-    medium: {
-      paddingVertical: 8,
-      paddingHorizontal: 16,
-    },
-    large: {
-      paddingVertical: 12,
-      paddingHorizontal: 24,
-    },
-    text: {
-      fontSize: 14,
-      fontWeight: "600",
-    },
-    primaryText: {
-      color: theme.background,
-    },
-    secondaryText: {
-      color: theme.tint,
-    },
-    tertiaryText: {
-      color: theme.tint,
-    },
-    disabledPrimary: {
-      backgroundColor: theme.disabledBackground,
-    },
-    disabledSecondary: {
-      borderColor: theme.disabledText,
-    },
-    disabledTertiary: {
-      // No background, only text color change
-    },
-    destructive: {
-      backgroundColor: theme.error,
-    },
-    disabledText: {
-      color: theme.disabledText,
-    },
-    destructiveText: {
-      color: theme.background,
-    },
-  });
+  const getBackgroundColor = () => {
+    if (disabled) return colors.disabledBackground;
 
-  const getTextWeight = () => {
+    switch (variant) {
+      case "primary":
+        return colors.primary;
+      case "secondary":
+        return "transparent";
+      case "tertiary":
+        return "transparent";
+      case "destructive":
+        return colors.error;
+      default:
+        return colors.primary;
+    }
+  };
+
+  const getBorderStyle = () => {
+    if (variant === "secondary") {
+      return {
+        borderWidth: 1,
+        borderColor: disabled ? colors.disabledText : colors.primary,
+      };
+    }
+    return {};
+  };
+
+  const getTextColor = () => {
+    if (disabled) return colors.disabledText;
+
+    switch (variant) {
+      case "primary":
+        return colors.invertText;
+      case "secondary":
+        return colors.primary;
+      case "tertiary":
+        return colors.primary;
+      case "destructive":
+        return colors.invertText;
+      default:
+        return colors.invertText;
+    }
+  };
+
+  const getSizeStyles = () => {
     switch (size) {
       case "small":
-        return "medium";
+        return {
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+          minHeight: 28,
+        };
       case "medium":
-        return "semiBold";
+        return {
+          paddingHorizontal: 8,
+          paddingVertical: 6,
+          minHeight: 34,
+        };
       case "large":
-        return "bold";
+        return {
+          paddingHorizontal: 24,
+          paddingVertical: 12,
+          minHeight: 48,
+        };
       default:
-        return "semiBold";
+        return {
+          paddingHorizontal: 8,
+          paddingVertical: 6,
+          minHeight: 34,
+        };
     }
   };
 
   return (
     <Pressable
-      style={[
-        styles.button,
-        styles[variant],
-        props.disabled &&
-          styles[
-            `disabled${variant.charAt(0).toUpperCase() + variant.slice(1)}` as
-              | "disabledPrimary"
-              | "disabledSecondary"
-              | "disabledTertiary"
-          ],
-        styles[size],
-        style as StyleProp<ViewStyle>,
-      ]}
-      disabled={props.disabled || loading}
       {...props}
+      disabled={disabled || loading}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.button,
+        {
+          backgroundColor: getBackgroundColor(),
+          ...getBorderStyle(),
+          ...getSizeStyles(),
+        },
+        pressed && styles.pressed,
+        style,
+      ]}
     >
       {loading ? (
-        <ActivityIndicator
-          size="small"
-          color={variant === "primary" || variant === "destructive" ? theme.background : theme.tint}
-        />
+        <ActivityIndicator size="small" color={getTextColor()} />
       ) : (
         <Typography
-          variant="button"
-          weight={getTextWeight() as any}
-          color={
-            props.disabled
-              ? theme.disabledText
-              : variant === "primary" || variant === "destructive"
-              ? theme.background
-              : theme.tint
-          }
+          variant="body"
+          weight="regular"
+          color={getTextColor()}
           font="lexend"
         >
           {title}
@@ -148,43 +135,17 @@ export const Button = ({
   );
 };
 
-interface InlineButtonProps extends PressableProps {
-  title: string;
-  color?: "primary" | "error";
-}
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 8,
+    gap: 8,
+  },
+  pressed: {
+    opacity: 0.8,
+  },
+});
 
-export const InlineButton = ({
-  title,
-  color = "primary",
-  style,
-  ...props
-}: InlineButtonProps) => {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
-
-  const styles = StyleSheet.create({
-    button: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    text: {
-      fontSize: 13,
-      fontWeight: "600",
-    },
-    primary: {
-      color: theme.tint,
-    },
-    error: {
-      color: theme.error,
-    },
-  });
-
-  return (
-    <Pressable
-      style={[styles.button, style as StyleProp<ViewStyle>]}
-      {...props}
-    >
-      <Text style={[styles.text, styles[color]]}>{title}</Text>
-    </Pressable>
-  );
-};
+export default Button;

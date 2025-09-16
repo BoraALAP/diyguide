@@ -1,5 +1,10 @@
+/**
+ * Auth renders Supabase authentication flows (password, magic link, GitHub,
+ * Apple) and manages session refresh + deep links. Drop in on screens that
+ * should require sign-in before showing content, like the profile tab.
+ */
 import React, { useState } from "react";
-import { StyleSheet, View, AppState, Platform } from "react-native";
+import { StyleSheet, View, AppState, Platform, ScrollView, Text } from "react-native";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Updates from "expo-updates";
 import { useForm, Controller } from "react-hook-form";
@@ -7,9 +12,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import * as Linking from "expo-linking";
 import { supabase } from "@/lib/supabaseClient";
-import { ScrollViewT, SecondaryText, TextT, ViewT } from "./Themed";
+
 import Input from "./Input";
-import { Button } from "./Button";
+import PrimaryButton from "./Button";
 import { useSupabase } from "@/utils/SupabaseProvider";
 
 // Define the schema using zod
@@ -75,7 +80,7 @@ export default function Auth() {
   };
 
   return (
-    <ScrollViewT contentContainerStyle={styles.scrollViewContent}>
+    <ScrollView contentContainerStyle={styles.scrollViewContent}>
       <View style={styles.container}>
         <View style={styles.inputs}>
           <Controller
@@ -118,13 +123,13 @@ export default function Auth() {
 
         {usePassword && (
           <View style={styles.topButtons}>
-            <Button
+            <PrimaryButton
               title="Sign in"
               onPress={handleSubmit(onSubmit)}
               disabled={loading || !isFormValid}
             />
 
-            <Button
+            <PrimaryButton
               title="Sign up"
               disabled={loading || !isFormValid}
               variant="secondary"
@@ -139,10 +144,10 @@ export default function Auth() {
           <View style={styles.bottomButtons}>
             {magicLinkSent ? (
               <View style={styles.magicLinkSent}>
-                <TextT bold>Check your email for the magic link.</TextT>
+                <Text>Check your email for the magic link.</Text>
               </View>
             ) : (
-              <Button
+              <PrimaryButton
                 onPress={async () => {
                   const email = getValues("email");
                   if (email) {
@@ -163,7 +168,7 @@ export default function Auth() {
 
         <View style={styles.bottomButtons}>
           {usePassword ? (
-            <Button
+            <PrimaryButton
               onPress={async () => {
                 setUsePassword(false);
               }}
@@ -171,7 +176,7 @@ export default function Auth() {
               variant="secondary"
             />
           ) : (
-            <Button
+            <PrimaryButton
               onPress={async () => {
                 setUsePassword(true);
               }}
@@ -183,14 +188,14 @@ export default function Auth() {
 
         <View style={styles.orContainer}>
           <View style={styles.orLine} />
-          <TextT bold style={styles.orText}>
+          <Text style={styles.orText}>
             Or
-          </TextT>
+          </Text>
           <View style={styles.orLine} />
         </View>
 
         <View style={styles.bottomButtons}>
-          <Button
+          <PrimaryButton
             onPress={() => performOAuth("github")}
             title="Sign in with Github"
             variant="tertiary"
@@ -245,9 +250,9 @@ export default function Auth() {
         </View>
       </View>
       <View style={styles.versionContainer}>
-        <SecondaryText>update Id: {Updates.updateId}</SecondaryText>
+        <Text>update Id: {Updates.updateId}</Text>
       </View>
-    </ScrollViewT>
+    </ScrollView>
   );
 }
 

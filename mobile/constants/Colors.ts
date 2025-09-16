@@ -27,9 +27,11 @@ export default {
     // Border colors from Figma
     border: "hsl(0, 0%, 85%)", // #d9d9d9 - Border/Input
     borderInputFilled: "hsl(0, 0%, 80%)", // #cccccc - Border/Input/Filled
+    borderSeperator: "hsl(0, 0%, 80%)",
 
     // Icon colors from Figma
     icon: "hsl(0, 0%, 40%)", // #666666 - Icon/Medium
+    stepCircle: "hsl(0, 0%, 20%)",
 
     // Theme colors
     tint: tintColorLight,
@@ -42,7 +44,7 @@ export default {
     cardBackground: "hsl(0, 0%, 100%)",
     sectionBackground: "hsl(193, 100%, 85%)",
     headerBackground: "hsla(0, 0%, 100%, 0.25)",
-    error: "hsl(0, 100%, 50%)",
+    error: "hsl(0, 100%, 30%)",
     selectedPackage: "hsl(193, 100%, 85%)",
     selectedPackageBorder: tintColorLight,
     disabledBackground: "hsl(0, 0%, 88%)",
@@ -70,9 +72,12 @@ export default {
     // Border colors (dark mode)
     border: "hsl(0, 0%, 25%)",
     borderInputFilled: "hsl(0, 0%, 30%)",
+    borderSeperator: "hsl(0, 0%, 30%)",
 
     // Icon colors (dark mode)
     icon: "hsl(0, 0%, 60%)",
+
+    stepCircle: "hsl(0, 0%, 80%)",
 
     // Theme colors
     tint: tintColorDark,

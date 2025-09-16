@@ -1,5 +1,9 @@
+/**
+ * Typography maps design-system text variants to loaded Lexend/Literata fonts.
+ * Prefer this over raw Text for consistent typography.
+ */
 import React from "react";
-import { Text, TextProps, StyleSheet } from "react-native";
+import { StyleSheet, Text, TextProps, TextStyle } from "react-native";
 
 // Font family constants
 export const FontFamilies = {
@@ -33,224 +37,230 @@ export const FontFamilies = {
     extraBoldItalic: "Literata_800ExtraBold_Italic",
     blackItalic: "Literata_900Black_Italic",
   },
-};
+} as const;
 
-interface TypographyProps extends TextProps {
-  variant?:
-    | "h1"
-    | "h2"
-    | "h3"
-    | "h4"
-    | "h5"
-    | "h6"
-    | "body"
-    | "body1"
-    | "body2"
-    | "subtitle1"
-    | "subtitle2"
-    | "caption"
-    | "captionSm"
-    | "label"
-    | "button";
-  weight?:
-    | "thin"
-    | "extraLight"
-    | "light"
-    | "regular"
-    | "medium"
-    | "semiBold"
-    | "bold"
-    | "extraBold"
-    | "black";
-  font?: "lexend" | "literata";
+export type FontFamilyName = keyof typeof FontFamilies;
+export type FontWeightName =
+  | "thin"
+  | "extraLight"
+  | "light"
+  | "regular"
+  | "medium"
+  | "semiBold"
+  | "bold"
+  | "extraBold"
+  | "black";
+export type VariantName =
+  | "h1"
+  | "h2"
+  | "h3"
+  | "h4"
+  | "h5"
+  | "h6"
+  | "body"
+  | "body1"
+  | "body2"
+  | "subtitle1"
+  | "subtitle2"
+  | "caption"
+  | "captionSm"
+  | "label"
+  | "button";
+
+export interface TypographyProps extends TextProps {
+  variant?: VariantName;
+  weight?: FontWeightName;
+  font?: FontFamilyName;
   color?: string;
   italic?: boolean;
   children: React.ReactNode;
 }
 
-const Typography: React.FC<TypographyProps> = ({
-  variant = "body",
-  weight,
-  font,
-  color,
-  italic = false,
-  style,
-  children,
-  ...props
-}) => {
-  // Get default font and weight for Figma-specific variants
-  const getDefaultFontSettings = () => {
-    switch (variant) {
-      case "h2":
-        return { font: "literata" as const, weight: "semiBold" as const };
-      case "h3":
-        return { font: "lexend" as const, weight: "bold" as const };
-      case "h6":
-        return { font: "lexend" as const, weight: "medium" as const };
-      case "body":
-        return { font: "lexend" as const, weight: "regular" as const };
-      case "label":
-      case "captionSm":
-        return { font: "lexend" as const, weight: "light" as const };
-      default:
-        return { font: font || "lexend", weight: weight || "regular" };
+type VariantDefaults = Record<VariantName, { font: FontFamilyName; weight: FontWeightName }>;
+
+const VARIANT_DEFAULTS: VariantDefaults = {
+  h1: { font: "lexend", weight: "regular" },
+  h2: { font: "literata", weight: "semiBold" },
+  h3: { font: "lexend", weight: "bold" },
+  h4: { font: "lexend", weight: "regular" },
+  h5: { font: "lexend", weight: "regular" },
+  h6: { font: "lexend", weight: "medium" },
+  body: { font: "lexend", weight: "regular" },
+  body1: { font: "lexend", weight: "regular" },
+  body2: { font: "lexend", weight: "regular" },
+  subtitle1: { font: "lexend", weight: "regular" },
+  subtitle2: { font: "lexend", weight: "regular" },
+  caption: { font: "lexend", weight: "regular" },
+  captionSm: { font: "lexend", weight: "light" },
+  label: { font: "lexend", weight: "light" },
+  button: { font: "lexend", weight: "regular" },
+};
+
+const resolveFontFamily = (font: FontFamilyName, weight: FontWeightName, italic: boolean) => {
+  if (font === "lexend") {
+    return FontFamilies.lexend[weight];
+  }
+
+  const literataFamilies = FontFamilies.literata as Record<string, string>;
+
+  if (italic) {
+    const italicKey = `${weight}Italic`;
+    if (literataFamilies[italicKey]) {
+      return literataFamilies[italicKey];
     }
+  }
+
+  return literataFamilies[weight] ?? literataFamilies.regular;
+};
+
+const BaseTypography = React.forwardRef<Text, TypographyProps>(function Typography(
+  {
+    variant = "body",
+    weight,
+    font,
+    color,
+    italic = false,
+    style,
+    children,
+    ...props
+  },
+  ref,
+) {
+  const defaults = VARIANT_DEFAULTS[variant];
+  const resolvedFont = font ?? defaults.font;
+  const resolvedWeight = weight ?? defaults.weight;
+  const fontFamily = resolveFontFamily(resolvedFont, resolvedWeight, italic);
+
+  const fontStyle: TextStyle["fontStyle"] =
+    italic && resolvedFont === "lexend" ? "italic" : "normal";
+
+  const inlineStyle: TextStyle = {
+    fontFamily,
+    fontStyle,
   };
 
-  // Use Figma defaults if not specified
-  const defaultSettings = getDefaultFontSettings();
-  const finalFont = font || defaultSettings.font;
-  const finalWeight = weight || defaultSettings.weight;
-
-  const getFontFamily = () => {
-    const weightMap = {
-      thin: "100Thin",
-      extraLight: "200ExtraLight",
-      light: "300Light",
-      regular: "400Regular",
-      medium: "500Medium",
-      semiBold: "600SemiBold",
-      bold: "700Bold",
-      extraBold: "800ExtraBold",
-      black: "900Black",
-    };
-
-    const fontWeight = weightMap[finalWeight as keyof typeof weightMap];
-    const italicSuffix = italic && finalFont === "literata" ? "_Italic" : "";
-
-    if (finalFont === "lexend") {
-      return `Lexend_${fontWeight}`;
-    } else {
-      return `Literata_${fontWeight}${italicSuffix}`;
-    }
-  };
-
-  const getVariantStyle = () => {
-    switch (variant) {
-      case "h1":
-        return styles.h1;
-      case "h2":
-        return styles.h2;
-      case "h3":
-        return styles.h3;
-      case "h4":
-        return styles.h4;
-      case "h5":
-        return styles.h5;
-      case "h6":
-        return styles.h6;
-      case "body":
-        return styles.body;
-      case "body1":
-        return styles.body1;
-      case "body2":
-        return styles.body2;
-      case "subtitle1":
-        return styles.subtitle1;
-      case "subtitle2":
-        return styles.subtitle2;
-      case "caption":
-        return styles.caption;
-      case "captionSm":
-        return styles.captionSm;
-      case "label":
-        return styles.label;
-      case "button":
-        return styles.button;
-      default:
-        return styles.body;
-    }
-  };
-
+  if (color) {
+    inlineStyle.color = color;
+  }
 
   return (
-    <Text
-      {...props}
-      style={[
-        getVariantStyle(),
-        {
-          fontFamily: getFontFamily(),
-          color: color,
-          fontStyle: italic && finalFont === "lexend" ? "italic" : "normal",
-        },
-        style,
-      ]}
-    >
+    <Text ref={ref} {...props} style={[styles[variant], inlineStyle, style]}>
       {children}
     </Text>
   );
+});
+
+BaseTypography.displayName = "Typography";
+
+type VariantComponentProps = Omit<TypographyProps, "variant">;
+
+const toPascalCase = (value: VariantName) => value.charAt(0).toUpperCase() + value.slice(1);
+
+const createVariantComponent = (variant: VariantName) => {
+  const VariantComponent = React.forwardRef<Text, VariantComponentProps>((props, ref) => (
+    <BaseTypography {...props} ref={ref} variant={variant} />
+  ));
+
+  VariantComponent.displayName = `Typography${toPascalCase(variant)}`;
+
+  return VariantComponent;
 };
 
+const variantComponents = {
+  H1: createVariantComponent("h1"),
+  H2: createVariantComponent("h2"),
+  H3: createVariantComponent("h3"),
+  H4: createVariantComponent("h4"),
+  H5: createVariantComponent("h5"),
+  H6: createVariantComponent("h6"),
+  Body: createVariantComponent("body"),
+  Body1: createVariantComponent("body1"),
+  Body2: createVariantComponent("body2"),
+  Subtitle1: createVariantComponent("subtitle1"),
+  Subtitle2: createVariantComponent("subtitle2"),
+  Caption: createVariantComponent("caption"),
+  CaptionSm: createVariantComponent("captionSm"),
+  Label: createVariantComponent("label"),
+  Button: createVariantComponent("button"),
+} as const;
+
+type TypographyComposite = typeof BaseTypography & typeof variantComponents;
+
+const Typography = Object.assign(BaseTypography, variantComponents) as TypographyComposite;
+
 // Typography styles based on Figma variables
-const styles = StyleSheet.create({
-  h1: {
-    fontSize: 36,
-    lineHeight: 44,
-  },
-  h2: {
-    // From Figma: Literata SemiBold 21px
-    fontSize: 21,
-    lineHeight: 21,
-  },
-  h3: {
-    // From Figma: Lexend Bold 16px
-    fontSize: 16,
-    lineHeight: 16,
-  },
-  h4: {
-    fontSize: 24,
-    lineHeight: 32,
-  },
-  h5: {
-    fontSize: 20,
-    lineHeight: 28,
-  },
-  h6: {
-    // From Figma: Lexend Medium 14px
-    fontSize: 14,
-    lineHeight: 14,
-  },
-  body: {
-    // From Figma: Lexend Regular 14px with 1.5 line height
-    fontSize: 14,
-    lineHeight: 21,
-  },
-  body1: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  body2: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  subtitle1: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  subtitle2: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  caption: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  captionSm: {
-    // From Figma: Lexend Light 11px with 1.5 line height
-    fontSize: 11,
-    lineHeight: 16.5,
-  },
-  label: {
-    // From Figma: Lexend Light 11px
-    fontSize: 11,
-    lineHeight: 11,
-  },
-  button: {
-    fontSize: 14,
-    lineHeight: 20,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-});
+// Using satisfies to ensure every variant has a matching style entry
+const styles = StyleSheet.create(
+  {
+    h1: {
+      fontSize: 24,
+      lineHeight: 30,
+    },
+    h2: {
+      // From Figma: Literata SemiBold 21px
+      fontSize: 21,
+      lineHeight: 26,
+    },
+    h3: {
+      // From Figma: Lexend Bold 16px
+      fontSize: 17,
+      lineHeight: 21,
+    },
+    h4: {
+      fontSize: 16,
+      lineHeight: 20,
+    },
+    h5: {
+      fontSize: 14,
+      lineHeight: 17,
+    },
+    h6: {
+      // From Figma: Lexend Medium 14px
+      fontSize: 14,
+      lineHeight: 17,
+    },
+    body: {
+      // From Figma: Lexend Regular 14px with 1.5 line height
+      fontSize: 14,
+      lineHeight: 21,
+    },
+    body1: {
+      fontSize: 16,
+      lineHeight: 24,
+    },
+    body2: {
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    subtitle1: {
+      fontSize: 16,
+      lineHeight: 24,
+    },
+    subtitle2: {
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    caption: {
+      fontSize: 12,
+      lineHeight: 16,
+    },
+    captionSm: {
+      // From Figma: Lexend Light 11px with 1.5 line height
+      fontSize: 11,
+      lineHeight: 16.5,
+    },
+    label: {
+      // From Figma: Lexend Light 11px
+      fontSize: 11,
+      lineHeight: 11,
+    },
+    button: {
+      fontSize: 14,
+      lineHeight: 20,
+      textTransform: "uppercase",
+      letterSpacing: 1,
+    },
+  } satisfies Record<VariantName, TextStyle>,
+);
 
 export default Typography;

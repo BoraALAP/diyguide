@@ -4,21 +4,25 @@ import {
   StyleSheet,
   Alert,
   RefreshControl,
+  View,
 } from "react-native";
 import { router } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { supabase } from "@/lib/supabaseClient";
 import GuideSection from "@/components/GuideSection";
 import Loading from "@/components/Loading";
-import { ViewT } from "@/components/Themed";
+import SearchField from "@/components/SearchField";
 
 import { useSupabase } from "@/utils/SupabaseProvider";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useColorScheme } from "@/components/useColorScheme";
+import Colors from "@/constants/Colors";
 
 interface Guide {
   id: string;
   name: string;
-  // category: string;
+  category?: string;
+  tags?: { name: string; hex?: string }[];
   steps: number;
   selected?: boolean;
   colorIndicator?: string;
@@ -26,31 +30,50 @@ interface Guide {
 
 export default function HomeScreen() {
   const { profile } = useSupabase();
-  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? "light"];
+
   const [loading, setLoading] = useState(false);
   const [latestGuides, setLatestGuides] = useState<Guide[]>([]);
   const [allGuides, setAllGuides] = useState<Guide[]>([]);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const insets = useSafeAreaInsets();
 
   const fetchLatestGuides = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from("guides")
-        .select("id, title, steps")
+        .select("id, title, steps, guide_tags(tags(id,name,hex_code))")
         .order("created_at", { ascending: false })
         .limit(10);
 
       if (error) throw error;
 
-      const formattedGuides: Guide[] = data?.map((guide, index) => ({
-        id: guide.id.toString(),
-        name: guide.title,
-        // category: guide.category || "General",
-        steps: Array.isArray(guide.steps) ? guide.steps.length : 0,
-        selected: index < 6, // First 6 items are "selected" for visual variety
-        colorIndicator: getColorIndicator(index),
-      })) || [];
+      const formattedGuides: Guide[] = (data ?? []).map((guide: any, index: number) => {
+        const tagsArr = Array.isArray(guide?.guide_tags)
+          ? guide.guide_tags
+            .map((gt: any) => gt?.tags)
+            .filter(Boolean)
+            .map((t: any) => ({
+              name: String(t.name),
+              hex: t.hex_code ? `#${String(t.hex_code).replace(/^#/, "")}` : undefined,
+            }))
+          : [];
+        const firstTag = tagsArr[0] || null;
+        const category = firstTag?.name || undefined;
+        const hex = firstTag?.hex;
+        return {
+          id: String(guide.id),
+          name: String(guide.title),
+          category,
+          tags: tagsArr,
+          steps: Array.isArray(guide.steps) ? guide.steps.length : 0,
+          selected: index < 6,
+          colorIndicator: hex,
+        } as Guide;
+      });
 
       setLatestGuides(formattedGuides);
     } catch (error: any) {
@@ -65,18 +88,34 @@ export default function HomeScreen() {
     try {
       const { data, error } = await supabase
         .from("guides")
-        .select("id, title, steps")
+        .select("id, title, steps, guide_tags(tags(id,name,hex_code))")
         .order("title", { ascending: true })
         .range(10, 25); // Skip first 10, get next 16
 
       if (error) throw error;
 
-      const formattedGuides: Guide[] = data?.map((guide) => ({
-        id: guide.id.toString(),
-        name: guide.title,
-        // category: guide.category || "General",
-        steps: Array.isArray(guide.steps) ? guide.steps.length : 0,
-      })) || [];
+      const formattedGuides: Guide[] = (data ?? []).map((guide: any) => {
+        const tagsArr = Array.isArray(guide?.guide_tags)
+          ? guide.guide_tags
+            .map((gt: any) => gt?.tags)
+            .filter(Boolean)
+            .map((t: any) => ({
+              name: String(t.name),
+              hex: t.hex_code ? `#${String(t.hex_code).replace(/^#/, "")}` : undefined,
+            }))
+          : [];
+        const firstTag = tagsArr[0] || null;
+        const category = firstTag?.name || undefined;
+        const hex = firstTag?.hex;
+        return {
+          id: String(guide.id),
+          name: String(guide.title),
+          category,
+          tags: tagsArr,
+          steps: Array.isArray(guide.steps) ? guide.steps.length : 0,
+          colorIndicator: hex,
+        } as Guide;
+      });
 
       setAllGuides(formattedGuides);
     } catch (error: any) {
@@ -84,10 +123,7 @@ export default function HomeScreen() {
     }
   };
 
-  const getColorIndicator = (index: number): string => {
-    const colors = ["#ff00bb", "#0080ff", "#ffa100", "#cc0055", "#00cc88", "#8800cc"];
-    return colors[index % colors.length];
-  };
+  // Colors are now read from the first associated tag's hex_code
 
   useEffect(() => {
     fetchLatestGuides();
@@ -98,48 +134,10 @@ export default function HomeScreen() {
     await Promise.all([fetchLatestGuides(), fetchAllGuides()]);
   };
 
-  const handleSearch = async (text: string) => {
-    setSearchValue(text);
-    // For now, just store the search value
-    // In a full implementation, you'd search and filter the guides
-    console.log("Searching for:", text);
-  };
-
-
-
-  const handleGenerate = async () => {
-    if (!profile) {
-      return Alert.alert(
-        "Please login first",
-        "You need to be logged in to generate a guide",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Login", style: "default", onPress: () => router.push("/profile") },
-        ]
-      );
-    }
-    if (profile?.tokens === 0) {
-      return Alert.alert(
-        "You don't have enough tokens",
-        "You need to buy more tokens to generate a guide",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Buy tokens", style: "default", onPress: () => router.push("/profile") },
-        ]
-      );
-    }
-
-    router.push({
-      pathname: "/home/generate",
-      params: { topic: searchValue || "" },
-    });
-  };
 
   if (loading && latestGuides.length === 0) {
     return <Loading />;
   }
-
-
 
   const handleGuidePress = (guide: Guide) => {
     router.push({
@@ -148,45 +146,83 @@ export default function HomeScreen() {
     });
   };
 
+  const handleSearch = (text: string) => {
+    setSearchQuery(text);
+  };
+
+  const handleGenerate = (text?: string) => {
+    const query = (text ?? searchQuery).trim();
+    if (query) {
+      router.push({ pathname: "/home/generate", params: { topic: query } });
+    } else {
+      router.push("/home/generate");
+    }
+  };
+
+  const filteredLatestGuides = searchQuery
+    ? latestGuides.filter(guide =>
+      guide.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      guide.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      guide.tags?.some(tag => tag.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
+    : latestGuides;
+
+  const filteredAllGuides = searchQuery
+    ? allGuides.filter(guide =>
+      guide.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      guide.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      guide.tags?.some(tag => tag.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
+    : allGuides;
+
   return (
-    <ViewT
-      style={[
-        styles.container,
-        {
-          backgroundColor: "#f7f7f7", // BG/Page from Figma
-          paddingTop: insets.top,
-        },
-      ]}
-    >
+    <View style={styles.container}>
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        style={{ paddingTop: insets.top }}
+        contentContainerStyle={[
+          styles.scrollView,
+          { paddingBottom: 80 + insets.bottom } // Account for search bar height + safe area
+        ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={onRefresh} />
         }
       >
-        <ViewT style={styles.content}>
+        <GuideSection
+          title="Latest Guides"
+          subtitle="Previously generated guides by other users."
+          guides={filteredLatestGuides}
+          onGuidePress={handleGuidePress}
+        />
+        {/* {filteredAllGuides.length > 0 && (
           <GuideSection
-            title="Latest Guides"
-            subtitle="Previously generated guides by other users."
-            guides={latestGuides}
+            title="All Guides"
+            subtitle="Browse through all available guides."
+            guides={filteredAllGuides}
             onGuidePress={handleGuidePress}
           />
-
-          <GuideSection
-            title="Guides"
-            subtitle="Previously generated guides by other users."
-            guides={allGuides}
-            onGuidePress={handleGuidePress}
-          />
-        </ViewT>
-
-        {/* Extra bottom padding for bottom tab bar */}
-        <ViewT style={styles.bottomPadding} />
+        )} */}
       </ScrollView>
 
-    </ViewT>
+      <View style={[
+        styles.searchBarContainer,
+        {
+          backgroundColor: colors.background,
+          borderTopColor: colors.border,
+
+        }
+      ]}>
+        <SearchField
+          value={searchQuery}
+          onChangeText={handleSearch}
+          onSearch={handleSearch}
+          onGenerate={handleGenerate}
+          placeholder="Search or Generate"
+          showGenerateButton={true}
+          style={styles.searchField}
+        />
+      </View>
+    </View>
   );
 }
 
@@ -195,17 +231,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  content: {
     paddingHorizontal: 16,
-    paddingTop: 32,
-    gap: 32,
   },
-  bottomPadding: {
-    height: 200, // Space for bottom tab bar + extra scroll space
+  searchBarContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
+  searchField: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
+  }
 });

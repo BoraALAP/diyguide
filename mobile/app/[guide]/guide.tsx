@@ -1,107 +1,41 @@
 import React, { Suspense, useState, useEffect } from "react";
-import { View, StyleSheet, useColorScheme, Image } from "react-native";
+import { View, StyleSheet, useColorScheme, ScrollView } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { supabase } from "@/lib/supabaseClient";
-import {
-  PageTitle,
-  ScrollViewT,
-  SecondaryText,
-  TextT,
-} from "@/components/Themed";
+
 import Colors from "@/constants/Colors";
 import Loading from "@/components/Loading";
+import GuideHeader from "@/components/GuideHeader";
+import GuideStep from "@/components/GuideStep";
+import ResourceSection from "@/components/ResourceSection";
+import Typography from "@/components/Typography";
 
 const getThemedStyles = (colorScheme: "light" | "dark" | null) => {
+  const colors = Colors[colorScheme ?? "light"];
+
   return StyleSheet.create({
-    content: {
-      rowGap: 16,
-      paddingBottom: 60,
-    },
-    header: {
-      rowGap: 8,
-      padding: 24,
-      paddingTop: 120,
-      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
-    },
-    materials: {
-      rowGap: 8,
-      padding: 24,
-      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
-    },
-    tools: {
-      rowGap: 8,
-      padding: 24,
-      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
-    },
-    stepMaterials: {
-      rowGap: 8,
-      padding: 12,
-      borderRadius: 12,
-      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
-    },
-    stepTools: {
-      rowGap: 8,
-      padding: 12,
-      borderRadius: 12,
-      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
-    },
-    tips: {
-      rowGap: 8,
-      marginHorizontal: 24,
-      borderRadius: 12,
-      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
-      padding: 24,
-    },
-    title: {
-      fontSize: 20,
-      fontWeight: "bold",
-    },
-    description: {
-      fontSize: 16,
-    },
-    subTitle: {
-      fontSize: 18,
-      fontWeight: "bold",
-    },
-    text: {
-      fontSize: 16,
-    },
-
-    steptitle: {
-      fontSize: 16,
-      fontWeight: "bold",
-
+    container: {
       flex: 1,
+      backgroundColor: colors.pageBackground,
     },
-    steps: {
-      rowGap: 16,
-      marginHorizontal: 24,
+    content: {
+      gap: 32,
+      paddingBottom: 24,
+      paddingTop: 129, // Account for top navigation
     },
-    step: {
-      rowGap: 8,
-      flexDirection: "row",
-      alignItems: "flex-start",
+    section: {
+      gap: 16,
+    },
+    sectionHeader: {
+      paddingHorizontal: 16,
+    },
+    stepsContainer: {
+      gap: 24,
+      paddingHorizontal: 16,
+    },
+    resourcesContainer: {
+      paddingHorizontal: 16,
       gap: 8,
-    },
-    stepImage: {
-      width: "100%",
-      height: 200,
-      borderRadius: 12,
-      backgroundColor: Colors[colorScheme ?? "light"].sectionBackground,
-    },
-    stepContainer: {
-      rowGap: 8,
-
-      paddingBottom: 16,
-    },
-    stepsSubTitle: {
-      fontSize: 12,
-      fontWeight: "bold",
-    },
-    stepNumber: {
-      fontSize: 14,
-      marginTop: 1,
-      fontWeight: "bold",
     },
   });
 };
@@ -118,10 +52,12 @@ export default function GuidePage() {
       setLoading(true);
       const { data, error } = await supabase
         .from("guides")
-        .select("*")
+        .select("*, guide_tags!inner(*, tags!inner(*))")
         .eq("id", guide)
         .single();
+
       console.log(data);
+
 
       setInfo(data);
       setError(error);
@@ -153,78 +89,77 @@ export default function GuidePage() {
     }
   };
 
+  if (loading) {
+    return <Loading />;
+  }
+
+  if (error || !info) {
+    return (
+      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <Typography variant="body" color={Colors[colorScheme ?? "light"].text}>
+          {error ? "Error loading guide" : "Guide not found"}
+        </Typography>
+      </View>
+    );
+  }
+
+
+
   return (
     <Suspense fallback={<Loading />}>
-      <ScrollViewT contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <PageTitle>{info?.title}</PageTitle>
-          <TextT>{info?.content}</TextT>
-        </View>
-        <View></View>
+      <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.content}>
+          {/* Guide Header */}
+          <View style={styles.section}>
+            <GuideHeader
+              title={info.title || "Guide Title"}
+              description={info.content || "Guide description"}
+              categories={info.guide_tags.tags}
+            />
 
-        {info?.materials !== null && (
-          <View style={styles.materials}>
-            <TextT style={styles.subTitle}>Materials</TextT>
-            {info?.materials.map((material: string) => {
-              return <SecondaryText key={material}>{material}</SecondaryText>;
-            })}
-          </View>
-        )}
-        {info?.tools !== null && (
-          <View style={styles.tools}>
-            <TextT style={styles.subTitle}>Tools</TextT>
-            {info?.tools.map((tool: string) => {
-              return <SecondaryText key={tool}>{tool}</SecondaryText>;
-            })}
-          </View>
-        )}
-        <View style={styles.steps}>
-          <TextT style={styles.subTitle}>Steps</TextT>
-          {info?.steps.map((step: any) => {
-            return (
-              <View key={step.step} style={styles.stepContainer}>
-                <View style={styles.step}>
-                  <TextT style={styles.stepNumber}>{step.step}.</TextT>
-                  <TextT style={styles.steptitle}>{step.description}</TextT>
-                </View>
-                {step.image_url ? (
-                  <Image
-                    source={{ uri: fixImageUrl(step.image_url) || undefined }}
-                    style={styles.stepImage}
-                    resizeMode="cover"
-                  />
-                ) : null}
-                {step.materials.length > 0 && (
-                  <View style={styles.stepMaterials}>
-                    <TextT style={styles.stepsSubTitle}>Materials</TextT>
-                    {step.materials.map((material: string) => {
-                      return (
-                        <SecondaryText key={material}>{material}</SecondaryText>
-                      );
-                    })}
-                  </View>
-                )}
-                {step.tools.length > 0 && (
-                  <View style={styles.stepTools}>
-                    <TextT style={styles.stepsSubTitle}>Tools</TextT>
-                    {step.tools.map((tool: string) => {
-                      return <SecondaryText key={tool}>{tool}</SecondaryText>;
-                    })}
-                  </View>
-                )}
+            {/* Materials and Tools Sections */}
+            {(info.tools.length > 0 || info.materials.length > 0) && (
+              <View style={styles.resourcesContainer}>
+                {info.materials.length > 0 && (<ResourceSection
+                  title="Materials"
+                  items={info.materials || []}
+                />)}
+                {info.tools.length > 0 && (<ResourceSection
+                  title="Tools"
+                  items={info.tools || []}
+                />)}
               </View>
-            );
-          })}
-        </View>
-        {info?.tips !== null && (
-          <View style={styles.tips}>
-            <TextT style={styles.subTitle}>Tips</TextT>
-            {info?.tips?.map((tip: string) => {
-              return <SecondaryText key={tip}>{tip}</SecondaryText>;
-            })}
+            )}
           </View>
-        )}
-      </ScrollViewT>
+
+          {/* Steps Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Typography
+                variant="h5"
+                weight="semiBold"
+                color={Colors[colorScheme ?? "light"].text}
+              >
+                Steps
+              </Typography>
+            </View>
+
+            <View style={styles.stepsContainer}>
+              {info.steps?.map((step: any, index: number) => (
+                <GuideStep
+                  key={step.step || index}
+                  stepNumber={step.step || index + 1}
+                  title={step.title || "Title of the step"}
+                  description={step.description || "Step description"}
+                  imageUrl={fixImageUrl(step.image_url)}
+                  materials={step.materials || []}
+                  tools={step.tools || []}
+                />
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+      </View>
     </Suspense>
   );
 }

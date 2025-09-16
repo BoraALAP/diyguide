@@ -9,6 +9,7 @@ import { GoogleGenAI } from "https://esm.sh/@google/genai@0.7.0";
 
 const StepSchema = z.object({
   step: z.number(),
+  title: z.string(),
   description: z.string(),
   materials: z.array(z.string()),
   tools: z.array(z.string()),
@@ -102,11 +103,20 @@ serve(async (req) => {
     const createdBy = userData?.user?.id ?? null;
 
     // Tag hinting
-    const { data: existingTags = [] } = await supabase.from("tags").select(
-      "id,name",
-    );
+    const { data: existingTags = [] } = await supabase
+      .from("tags")
+      .select("id,name,hex_code");
+    // Case-insensitive tag map (keyed by lowercase)
     const tagMap: Record<string, number> = Object.fromEntries(
-      (existingTags || []).map((t: any) => [t.name, t.id]),
+      (existingTags || []).map((
+        t: any,
+      ) => [String(t.name).toLowerCase(), t.id]),
+    );
+    // Track used hex codes to avoid collisions on insert
+    const usedHex = new Set<string>(
+      (existingTags || []).map((t: any) =>
+        String(t.hex_code || "").toLowerCase()
+      ),
     );
     const tagHint = Object.keys(tagMap).length
       ? `Use existing tags where applicable: ${Object.keys(tagMap).join(", ")}.`
@@ -136,14 +146,65 @@ serve(async (req) => {
 
         try {
           // 1) Upsert new tags
-          const newTags = object.tags.filter((t) => !tagMap[t]);
+          // Normalize candidate tag names (case-insensitive check)
+          const newTags = object.tags.filter((t) =>
+            !tagMap[String(t).toLowerCase()]
+          );
           if (newTags.length) {
+            // Helper to generate a unique 6-hex color not in usedHex
+            const randHex = () =>
+              Math.floor(Math.random() * 0xffffff)
+                .toString(16)
+                .padStart(6, "0");
+            const relLum = (hex: string) => {
+              const h = hex.replace(/^#/, "");
+              const r = parseInt(h.slice(0, 2), 16) / 255;
+              const g = parseInt(h.slice(2, 4), 16) / 255;
+              const b = parseInt(h.slice(4, 6), 16) / 255;
+              const lin = (c: number) =>
+                c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+              const R = lin(r), G = lin(g), B = lin(b);
+              return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+            };
+            const contrast = (L1: number, L2: number) => {
+              const [hi, lo] = L1 > L2 ? [L1, L2] : [L2, L1];
+              return (hi + 0.05) / (lo + 0.05);
+            };
+            const okForLightAndDark = (hex: string) => {
+              const L = relLum(hex);
+              const cWhite = contrast(L, 1.0);
+              const cBlack = contrast(L, 0.0);
+              return cWhite >= 3 && cBlack >= 3; // visible on both
+            };
+            const nextHex = () => {
+              let h = randHex();
+              let attempts = 0;
+              while (
+                (usedHex.has(h.toLowerCase()) || !okForLightAndDark(h)) &&
+                attempts < 64
+              ) {
+                h = randHex();
+                attempts++;
+              }
+              usedHex.add(h.toLowerCase());
+              return h;
+            };
+
+            const cap = (s: string) =>
+              s.length ? s[0].toUpperCase() + s.slice(1).toLowerCase() : s;
             const { data: inserted, error: insErr } = await supabase
               .from("tags")
-              .insert(newTags.map((name) => ({ name })))
-              .select("id,name");
+              .insert(
+                newTags.map((name) => ({
+                  name: cap(name),
+                  hex_code: nextHex(),
+                })),
+              )
+              .select("id,name,hex_code");
             if (!insErr) {
-              for (const t of inserted ?? []) tagMap[t.name] = t.id;
+              for (const t of inserted ?? []) {
+                tagMap[String(t.name).toLowerCase()] = t.id;
+              }
             } else {
               console.log(
                 "Insert tags (RLS) failed, trying with service role:",
@@ -151,10 +212,17 @@ serve(async (req) => {
               );
               const { data: insertedSrv, error: insSrvErr } = await svc
                 .from("tags")
-                .insert(newTags.map((name) => ({ name })))
-                .select("id,name");
+                .insert(
+                  newTags.map((name) => ({
+                    name: cap(name),
+                    hex_code: nextHex(),
+                  })),
+                )
+                .select("id,name,hex_code");
               if (!insSrvErr) {
-                for (const t of insertedSrv ?? []) tagMap[t.name] = t.id;
+                for (const t of insertedSrv ?? []) {
+                  tagMap[String(t.name).toLowerCase()] = t.id;
+                }
               }
             }
           }
@@ -206,8 +274,11 @@ serve(async (req) => {
           // 3) Link tags
           if (object.tags.length && guideId) {
             const pairs = object.tags
-              .filter((t) => tagMap[t])
-              .map((t) => ({ guide_id: guideId!, tag_id: tagMap[t] }));
+              .filter((t) => tagMap[String(t).toLowerCase()])
+              .map((t) => ({
+                guide_id: guideId!,
+                tag_id: tagMap[String(t).toLowerCase()],
+              }));
             const { error: linkErr } = await svc.from("guide_tags").insert(
               pairs,
             );

@@ -1,3 +1,7 @@
+/**
+ * SearchField combines a search input with optional generate button visibility
+ * when active. Suitable for search-and-generate experiences.
+ */
 import React, { useState } from "react";
 import {
   View,
@@ -8,13 +12,13 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Typography from "./Typography";
-import PrimaryButton from "./PrimaryButton";
+import PrimaryButton from "./Button";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "./useColorScheme";
 
 interface SearchFieldProps extends Omit<TextInputProps, "style"> {
   onSearch?: (text: string) => void;
-  onGenerate?: () => void;
+  onGenerate?: (text: string) => void;
   style?: any;
   showGenerateButton?: boolean;
 }
@@ -41,6 +45,10 @@ const SearchField: React.FC<SearchFieldProps> = ({
 
   const handleSearch = () => {
     onSearch?.(inputValue);
+  };
+
+  const handleGenerate = () => {
+    onGenerate?.(inputValue.trim());
   };
 
   const isActive = isFocused || inputValue.length > 0;
@@ -88,7 +96,7 @@ const SearchField: React.FC<SearchFieldProps> = ({
       {isActive && (
         <PrimaryButton
           title="Generate"
-          onPress={onGenerate}
+          onPress={handleGenerate}
           style={styles.generateButton}
         />
       )}
@@ -107,9 +115,10 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flex: 1,
+
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 8,
+    paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 8,
     minHeight: 36,
@@ -120,7 +129,7 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     fontSize: 14,
-    lineHeight: 21,
+    lineHeight: 16,
     minHeight: 22,
   },
   generateButton: {

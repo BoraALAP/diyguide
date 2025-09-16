@@ -1,87 +1,121 @@
 import React, { useEffect, useState } from "react";
-import { View, FlatList, StyleSheet } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import {
+  ScrollView,
+  StyleSheet,
+  Alert,
+  RefreshControl,
+  View,
+} from "react-native";
+import { useLocalSearchParams, router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { supabase } from "@/lib/supabaseClient";
-import { Guides } from "@/types/custom";
-import SuggestionCard from "@/components/SuggestionCard";
-import { PageTitle, TextT } from "@/components/Themed";
+import GuideListItem from "@/components/GuideListItem";
 import Loading from "@/components/Loading";
+
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
+import { Card } from "@/components/Card";
+
+interface Guide {
+  id: string;
+  title: string;
+  steps: number;
+}
 
 export default function CategoryGuidesScreen() {
   const { id } = useLocalSearchParams();
   const [loading, setLoading] = useState(false);
-  const [guides, setGuides] = useState<Partial<Guides>[]>([]);
-  const [error, setError] = useState<any>(null);
+  const [guides, setGuides] = useState<Guide[]>([]);
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? "light"];
+
+  const fetchGuides = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("guide_tags")
+        .select(`
+          guides!inner (
+            id,
+            title,
+            steps
+          )
+        `)
+        .eq("tag_id", id);
+
+      if (error) throw error;
+
+      const formattedGuides: Guide[] = data?.map((item: any) => ({
+        id: item.guides.id.toString(),
+        title: item.guides.title,
+        steps: Array.isArray(item.guides.steps) ? item.guides.steps.length : 0,
+      })) || [];
+
+      setGuides(formattedGuides);
+    } catch (error: any) {
+      console.error("Error fetching guides:", error.message);
+      Alert.alert("Error", "Failed to load guides");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchGuides = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("tags")
-        .select("name, guide_tags( guides(id,title,steps))")
-        .eq("id", id)
-        .single();
-
-      if (error) {
-        console.error(error);
-        setError(error);
-      } else {
-        const list = data.guide_tags.map((item) => {
-          return item.guides;
-        });
-
-        setGuides(list as Partial<Guides>[]);
-      }
-      setLoading(false);
-    };
-
     if (id) {
       fetchGuides();
     }
   }, [id]);
 
-  if (loading) {
+  const onRefresh = async () => {
+    await fetchGuides();
+  };
+
+  const handleGuidePress = (guide: Guide) => {
+    router.push({
+      pathname: "/[guide]/guide",
+      params: { guide: guide.id },
+    });
+  };
+
+  if (loading && guides.length === 0) {
     return <Loading />;
   }
 
-  if (error) {
-    return (
-      <View style={styles.pageCenter}>
-        <TextT>Something went wrong</TextT>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={guides}
-        keyExtractor={(item) => item.id!.toString()}
-        renderItem={({ item }) => <SuggestionCard guide={item} />}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-        numColumns={2}
-      />
-    </View>
+
+    <ScrollView
+      style={{ paddingTop: insets.top }}
+      contentContainerStyle={
+        styles.scrollView
+      }
+
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+      }
+    >
+      <Card>
+        {guides.map((guide) => (
+          <GuideListItem
+            key={guide.id}
+            title={guide.title}
+            steps={guide.steps}
+            onPress={() => handleGuidePress(guide)}
+          />
+        ))}
+      </Card>
+
+    </ScrollView>
+
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     flex: 1,
-  },
-  pageCenter: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  title: {
-    marginBottom: 16,
-  },
-  content: {
-    gap: 16,
-    paddingTop: 120,
-    paddingBottom: 24,
-    paddingHorizontal: 8,
+    paddingHorizontal: 16,
+    paddingTop: 48, // Custom top padding
   },
 });

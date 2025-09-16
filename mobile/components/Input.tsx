@@ -1,151 +1,128 @@
-import React, { useState } from "react";
-import {
-  TextInput,
-  TextInputProps,
-  View,
-  StyleSheet,
-  Pressable,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+/**
+ * Input is the shared text field with label, helper/error text, and stateful
+ * styling tied to the active theme. Use for all text entry surfaces.
+ */
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, TextInput, TextInputProps } from "react-native";
 import Typography from "./Typography";
-import { useColorScheme } from "./useColorScheme";
 import Colors from "@/constants/Colors";
+import { useColorScheme } from "./useColorScheme";
 
-interface InputProps extends TextInputProps {
-  label?: string;
+interface InputProps extends Omit<TextInputProps, "style" | "value" | "onChangeText"> {
+  label: string;
+  value?: string | null;
+  placeholder: string;
+  disabled?: boolean;
+  onChangeText?: (text: string) => void;
   error?: string;
   helperText?: string;
-  leftIcon?: keyof typeof Ionicons.glyphMap;
-  rightIcon?: keyof typeof Ionicons.glyphMap;
-  onRightIconPress?: () => void;
-  variant?: "outlined" | "filled";
-  size?: "small" | "medium" | "large";
+  style?: any;
 }
 
 const Input: React.FC<InputProps> = ({
   label,
+  value,
+  placeholder,
+  disabled = false,
+  onChangeText,
   error,
   helperText,
-  leftIcon,
-  rightIcon,
-  onRightIconPress,
-  variant = "outlined",
-  size = "medium",
   style,
-  editable = true,
   ...props
 }) => {
-  const [isFocused, setIsFocused] = useState(false);
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
+  const [inputValue, setInputValue] = useState(value || "");
+  const [isFocused, setIsFocused] = useState(false);
 
-  const getSizeStyles = () => {
-    switch (size) {
-      case "small":
-        return {
-          input: { height: 36, fontSize: 14 },
-          padding: { paddingHorizontal: 12 },
-          iconSize: 18,
-        };
-      case "medium":
-        return {
-          input: { height: 44, fontSize: 16 },
-          padding: { paddingHorizontal: 16 },
-          iconSize: 20,
-        };
-      case "large":
-        return {
-          input: { height: 52, fontSize: 18 },
-          padding: { paddingHorizontal: 20 },
-          iconSize: 24,
-        };
-      default:
-        return {
-          input: { height: 44, fontSize: 16 },
-          padding: { paddingHorizontal: 16 },
-          iconSize: 20,
-        };
-    }
+  // Update inputValue when value prop changes
+  useEffect(() => {
+    setInputValue(value || "");
+  }, [value]);
+
+  // Determine the input state based on disabled and value
+  const hasValue = value !== null && value !== "";
+  const isDisabledWithValue = disabled && hasValue;
+  const isDisabledEmpty = disabled && !hasValue;
+
+  const handleChangeText = (text: string) => {
+    setInputValue(text);
+    onChangeText?.(text);
   };
 
-  const getVariantStyles = () => {
+  const getContainerStyle = () => {
     const baseStyle = {
+      borderWidth: 1,
       borderRadius: 8,
-      borderWidth: variant === "outlined" ? 1 : 0,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      backgroundColor: "#ffffff",
+      borderColor: "#cccccc",
     };
 
     if (error) {
       return {
         ...baseStyle,
-        borderColor: colors.error,
-        backgroundColor: variant === "filled" ? colors.errorBackground : "transparent",
+        borderColor: colors.error || "#cc0000",
+        backgroundColor: "#ffffff",
+      };
+    }
+
+    if (disabled) {
+      return {
+        ...baseStyle,
+        backgroundColor: "#f0f0f0", // BG/Input/Disabled
+        borderColor: isDisabledEmpty ? "#d9d9d9" : "#cccccc", // Border/Input vs Border/Input/Filled
       };
     }
 
     if (isFocused) {
       return {
         ...baseStyle,
-        borderColor: variant === "outlined" ? colors.tint : "transparent",
-        backgroundColor: variant === "filled" ? colors.inputBackgroundFocused : "transparent",
-        borderWidth: variant === "outlined" ? 2 : 0,
-      };
-    }
-
-    if (!editable) {
-      return {
-        ...baseStyle,
-        borderColor: variant === "outlined" ? colors.disabled : "transparent",
-        backgroundColor: colors.disabledBackground,
+        borderColor: colors.primaryDark || "#004c66", // Primary-Dark for active state
+        borderWidth: 1,
       };
     }
 
     return {
       ...baseStyle,
-      borderColor: variant === "outlined" ? colors.border || colors.icon : "transparent",
-      backgroundColor: variant === "filled" ? colors.inputBackground || colors.secondaryBackground : "transparent",
+      borderColor: hasValue ? "#cccccc" : "#d9d9d9", // Border/Input/Filled vs Border/Input
     };
   };
 
-  const sizeStyles = getSizeStyles();
-  const variantStyles = getVariantStyles();
+  const getLabelColor = () => {
+    if (error) return colors.error || "#cc0000";
+    if (isFocused) return colors.primaryDark || "#004c66";
+    return colors.secondaryText;
+  };
 
   return (
-    <View style={styles.container}>
-      {label && (
+    <View style={[getContainerStyle(), style]}>
+      <Typography
+        variant="label"
+        weight="light"
+        color={getLabelColor()}
+        style={styles.label}
+      >
+        {label}
+      </Typography>
+
+      {disabled ? (
         <Typography
-          variant="body2"
-          weight="medium"
-          color={error ? colors.error : colors.text}
-          style={styles.label}
-          font="lexend"
+          variant="body"
+          color={hasValue ? colors.text : colors.lightText}
+          style={styles.value}
         >
-          {label}
+          {hasValue ? value : placeholder}
         </Typography>
-      )}
-
-      <View style={[styles.inputContainer, variantStyles]}>
-        {leftIcon && (
-          <Ionicons
-            name={leftIcon}
-            size={sizeStyles.iconSize}
-            color={error ? colors.error : colors.icon}
-            style={styles.leftIcon}
-          />
-        )}
-
+      ) : (
         <TextInput
           {...props}
-          editable={editable}
-          style={[
-            styles.input,
-            sizeStyles.input,
-            sizeStyles.padding,
-            leftIcon && { paddingLeft: 0 },
-            rightIcon && { paddingRight: 0 },
-            { color: colors.text, fontFamily: "Lexend_400Regular" },
-            style,
-          ]}
-          placeholderTextColor={colors.placeholderText || colors.icon}
+          value={inputValue}
+          onChangeText={handleChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={colors.lightText}
+          editable={!disabled}
           onFocus={(e) => {
             setIsFocused(true);
             props.onFocus?.(e);
@@ -154,30 +131,19 @@ const Input: React.FC<InputProps> = ({
             setIsFocused(false);
             props.onBlur?.(e);
           }}
+          style={[
+            styles.textInput,
+            { color: colors.text }
+          ]}
         />
-
-        {rightIcon && (
-          <Pressable
-            onPress={onRightIconPress}
-            disabled={!onRightIconPress}
-            style={styles.rightIconContainer}
-          >
-            <Ionicons
-              name={rightIcon}
-              size={sizeStyles.iconSize}
-              color={error ? colors.error : colors.icon}
-            />
-          </Pressable>
-        )}
-      </View>
+      )}
 
       {(error || helperText) && (
         <Typography
-          variant="caption"
-          weight="regular"
-          color={error ? colors.error : colors.secondaryText || colors.icon}
+          variant="label"
+          weight="light"
+          color={error ? colors.error || "#cc0000" : colors.secondaryText}
           style={styles.helperText}
-          font="lexend"
         >
           {error || helperText}
         </Typography>
@@ -187,30 +153,24 @@ const Input: React.FC<InputProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
+  label: {
     width: "100%",
   },
-  label: {
-    marginBottom: 6,
+  value: {
+    width: "100%",
   },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    overflow: "hidden",
-  },
-  input: {
-    flex: 1,
-  },
-  leftIcon: {
-    marginLeft: 12,
-    marginRight: 8,
-  },
-  rightIconContainer: {
-    paddingHorizontal: 12,
+  textInput: {
+    fontSize: 14,
+    fontFamily: "Lexend_400Regular",
+    lineHeight: 21, // 1.5 line height
+    width: "100%",
+    padding: 0, // Remove default padding
+    margin: 0, // Remove default margin
+    minHeight: 21, // Ensure consistent height
   },
   helperText: {
     marginTop: 4,
-    marginLeft: 4,
+    width: "100%",
   },
 });
 

@@ -1,3 +1,7 @@
+/**
+ * CategoryBadge renders a compact pill with a color indicator. Ideal for
+ * highlighting a guide's category or tag within metadata rows.
+ */
 import React from "react";
 import { View, StyleSheet, ViewProps } from "react-native";
 import Typography from "./Typography";

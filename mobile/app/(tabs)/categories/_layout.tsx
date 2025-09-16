@@ -36,7 +36,7 @@ export default function _layout() {
             backgroundColor: "rgba(238, 238, 238, 0.15)",
           },
           contentStyle: {
-            backgroundColor: Colors[colorScheme ?? "light"].background,
+            backgroundColor: Colors[colorScheme ?? "light"].pageBackground,
           },
         })}
       />

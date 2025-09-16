@@ -1,6 +1,6 @@
 // app/generate.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, ScrollView, StyleSheet, Button, useColorScheme, ActivityIndicator } from "react-native";
+import { View, ScrollView, StyleSheet, useColorScheme, ActivityIndicator, Pressable } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { fetch as expoFetch } from "expo/fetch";
@@ -8,8 +8,14 @@ import * as Crypto from "expo-crypto";
 import { z } from "zod";
 import { supabase } from "@/lib/supabaseClient";
 import { useSupabase } from "@/utils/SupabaseProvider";
-import { PageTitle, TextT, SecondaryText } from "@/components/Themed";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+
 import Colors from "@/constants/Colors";
+import GuideHeader from "@/components/GuideHeader";
+import GuideStep from "@/components/GuideStep";
+import ResourceSection from "@/components/ResourceSection";
+import Typography from "@/components/Typography";
 
 
 // helper: allow "", null, undefined; only validate when non-empty
@@ -62,7 +68,9 @@ async function waitForSavedId(sessionId: string, timeoutMs = 30000) {
 
 export default function GenerateScreen() {
   const colorScheme = useColorScheme() ?? "light";
+  const colors = Colors[colorScheme];
   const styles = useMemo(() => makeStyles(colorScheme), [colorScheme]);
+  const insets = useSafeAreaInsets();
   const { topic } = useLocalSearchParams<{ topic?: string }>();
   const { removeToken } = useSupabase();
 
@@ -98,6 +106,11 @@ export default function GenerateScreen() {
       if (id && !navigated) {
         setNavigated(true);
         await removeToken().catch(() => { });
+        // Navigate to the generated guide
+        // router.replace({
+        //   pathname: "/[guide]/guide",
+        //   params: { guide: String(id) },
+        // });
       }
     },
   });
@@ -109,94 +122,202 @@ export default function GenerateScreen() {
     submit({ query: q, sessionId: sessionIdRef.current } as any);
   }, [topic, authHeader]);
 
+  // Format tags for GuideHeader categories
+  const categories = object?.tags?.filter((tag): tag is string => !!tag).map((tag: string) => ({
+    name: tag,
+    color: colors.tint,
+  })) || [];
+
+  if (!object && !error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.tint} />
+        <Typography variant="body" color={colors.secondaryText}>
+          Generating You Guide...
+        </Typography>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <PageTitle>Generating your guide…</PageTitle>
-        {!!topic && <SecondaryText>Topic: “{topic}”</SecondaryText>}
-        <View style={styles.actions}>
-          {isLoading ? (
-            <Button title="Stop" onPress={stop} />
-          ) : (
-            <Button title="Close" onPress={() => router.back()} />
-          )}
-        </View>
+    <View style={styles.container}>
+      {/* Header Bar with Back/Stop button */}
+      <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
+        <Pressable
+          onPress={isLoading ? stop : () => router.back()}
+          style={styles.backButton}
+        >
+          <Ionicons
+            name={isLoading ? "stop-circle-outline" : "arrow-back"}
+            size={24}
+            color={colors.text}
+          />
+        </Pressable>
+        <Typography variant="h5" weight="semiBold" color={colors.text}>
+          {isLoading ? "Creating Response..." : "Guide Generated"}
+        </Typography>
+        <View style={{ width: 24 }} />
       </View>
 
-      {!object && (
-        <View style={styles.center}>
-          <ActivityIndicator />
-          <SecondaryText>Thinking…</SecondaryText>
-        </View>
-      )}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Guide Header Section */}
+        {object && (
+          <View style={styles.section}>
+            <GuideHeader
+              title={object.title || "Generating..."}
+              description={object.content || "Loading description..."}
+              categories={categories}
+            />
 
-      {!!object && (
-        <View style={styles.section}>
-          <TextT style={styles.title}>{object.title || "…"}</TextT>
-          <TextT style={styles.description}>{object.content || "…"}</TextT>
+            {/* Materials and Tools Sections */}
+            {((object.tools?.length ?? 0) > 0 || (object.materials?.length ?? 0) > 0) && (
+              <View style={styles.resourcesContainer}>
+                {(object.materials?.length ?? 0) > 0 && (
+                  <ResourceSection
+                    title="Materials"
+                    items={object.materials?.filter((item): item is string => !!item) ?? []}
+                  />
+                )}
+                {(object.tools?.length ?? 0) > 0 && (
+                  <ResourceSection
+                    title="Tools"
+                    items={object.tools?.filter((item): item is string => !!item) ?? []}
+                  />
+                )}
+              </View>
+            )}
+          </View>
+        )}
 
-          {!!object.materials?.length && (
-            <View style={styles.block}>
-              <TextT style={styles.subTitle}>Materials</TextT>
-              {object.materials.map((m, i) => (
-                <SecondaryText key={`${m}-${i}`}>{m}</SecondaryText>
+        {/* Steps Section */}
+        {(object?.steps?.length ?? 0) > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Typography
+                variant="h5"
+                weight="semiBold"
+                color={colors.text}
+              >
+                Steps
+              </Typography>
+            </View>
+
+            <View style={styles.stepsContainer}>
+              {object?.steps?.map((step: any, index: number) => (
+                <GuideStep
+                  key={step.step || index}
+                  stepNumber={step.step || index + 1}
+                  title={`Step ${step.step || index + 1}`}
+                  description={step.description || "Loading step..."}
+                  imageUrl={step.image_url}
+                  materials={step.materials || []}
+                  tools={step.tools || []}
+                />
               ))}
             </View>
-          )}
+          </View>
+        )}
 
-          {!!object.tools?.length && (
-            <View style={styles.block}>
-              <TextT style={styles.subTitle}>Tools</TextT>
-              {object.tools.map((t, i) => (
-                <SecondaryText key={`${t}-${i}`}>{t}</SecondaryText>
-              ))}
+        {/* Tips Section */}
+        {(object?.tips?.length ?? 0) > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Typography
+                variant="h5"
+                weight="semiBold"
+                color={colors.text}
+              >
+                Tips
+              </Typography>
             </View>
-          )}
-
-          {!!object.steps?.length && (
-            <View style={styles.block}>
-              <TextT style={styles.subTitle}>Steps</TextT>
-              {object.steps.map((s, i) => (
-                <View key={`step-${i}`} style={styles.step}>
-                  <TextT style={styles.stepNumber}>{s?.step ?? i + 1}.</TextT>
-                  <TextT style={styles.stepTitle}>{s?.description ?? "…"}</TextT>
+            <View style={styles.tipsContainer}>
+              {object?.tips?.filter((tip): tip is string => !!tip).map((tip: string, index: number) => (
+                <View key={index} style={styles.tipItem}>
+                  <Typography variant="body" color={colors.secondaryText}>
+                    • {tip}
+                  </Typography>
                 </View>
               ))}
             </View>
-          )}
+          </View>
+        )}
 
-          {!!object.tips?.length && (
-            <View style={styles.block}>
-              <TextT style={styles.subTitle}>Tips</TextT>
-              {object.tips.map((tip, i) => (
-                <SecondaryText key={`${tip}-${i}`}>{tip}</SecondaryText>
-              ))}
-            </View>
-          )}
-        </View>
-      )}
-
-      {!!error && (
-        <View style={styles.center}>
-          <SecondaryText>Oops: {String(error)}</SecondaryText>
-        </View>
-      )}
-    </ScrollView>
+        {/* Error Display */}
+        {error && (
+          <View style={styles.errorContainer}>
+            <Ionicons name="alert-circle" size={48} color={colors.error} />
+            <Typography variant="body" color={colors.error}>
+              {String(error)}
+            </Typography>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
-const makeStyles = (mode: "light" | "dark") =>
-  StyleSheet.create({
-    container: { rowGap: 16, paddingBottom: 60 },
-    header: { rowGap: 8, padding: 24, paddingTop: 24, backgroundColor: Colors[mode].sectionBackground },
-    actions: { flexDirection: "row", gap: 8, marginTop: 8 },
-    center: { alignItems: "center", justifyContent: "center", gap: 8, padding: 24 },
-    section: { rowGap: 12, paddingHorizontal: 24 },
-    title: { fontSize: 20, fontWeight: "bold" },
-    description: { fontSize: 16 },
-    subTitle: { fontSize: 18, fontWeight: "bold" },
-    block: { rowGap: 6, marginTop: 8 },
-    step: { rowGap: 6, paddingVertical: 8, flexDirection: "row", gap: 8, alignItems: "flex-start" },
-    stepNumber: { fontSize: 14, fontWeight: "bold" },
-    stepTitle: { fontSize: 16, fontWeight: "bold", flex: 1 },
+const makeStyles = (mode: "light" | "dark") => {
+  const colors = Colors[mode];
+
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.pageBackground,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 16,
+      backgroundColor: colors.pageBackground,
+    },
+    headerBar: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 16,
+      paddingBottom: 16,
+      backgroundColor: colors.background,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    backButton: {
+      padding: 4,
+    },
+    scrollContent: {
+      gap: 32,
+      paddingBottom: 24,
+      paddingTop: 16,
+    },
+    section: {
+      gap: 16,
+    },
+    sectionHeader: {
+      paddingHorizontal: 16,
+    },
+    resourcesContainer: {
+      paddingHorizontal: 16,
+      gap: 8,
+    },
+    stepsContainer: {
+      gap: 24,
+      paddingHorizontal: 16,
+    },
+    tipsContainer: {
+      paddingHorizontal: 16,
+      gap: 8,
+    },
+    tipItem: {
+      paddingVertical: 4,
+    },
+    errorContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 16,
+      padding: 32,
+    },
   });
+};

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, useColorScheme } from "react-native";
-import { TextT, ViewT, PageTitle, SecondaryText } from "@/components/Themed";
+import { StyleSheet, Text, useColorScheme, View } from "react-native";
+
 import { useRevenue } from "@/utils/RevenueProvider";
-import { Button } from "@/components/Button";
+import Button from "@/components/Button";
 import Purchases, {
   PurchasesOfferings,
   PurchasesPackage,
@@ -71,15 +71,15 @@ export default function PaywallScreen() {
   console.log(offerings);
 
   return (
-    <ViewT style={styles.container}>
-      <ViewT style={styles.content}>
-        <PageTitle>Get More Tokens</PageTitle>
-        <SecondaryText>
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Text>Get More Tokens</Text>
+        <Text>
           Purchase tokens to continue generating amazing content
-        </SecondaryText>
+        </Text>
 
         {offerings?.current?.availablePackages.map((pkg, index) => (
-          <ViewT
+          <View
             key={index}
             style={[
               styles.packageContainer,
@@ -87,12 +87,12 @@ export default function PaywallScreen() {
             ]}
             onTouchEnd={() => setSelectedPackage(pkg)}
           >
-            <TextT bold>{pkg.product.title}</TextT>
-            <TextT>{pkg.product.description}</TextT>
-            <TextT>{pkg.product.priceString}</TextT>
-          </ViewT>
+            <Text>{pkg.product.title}</Text>
+            <Text>{pkg.product.description}</Text>
+            <Text>{pkg.product.priceString}</Text>
+          </View>
         ))}
-        <ViewT style={styles.buttonContainer}>
+        <View style={styles.buttonContainer}>
           <Button
             onPress={handlePurchase}
             title={loading ? "Processing..." : "Purchase Selected Package"}
@@ -100,8 +100,8 @@ export default function PaywallScreen() {
             size="large"
             disabled={loading || !selectedPackage}
           />
-        </ViewT>
-      </ViewT>
-    </ViewT>
+        </View>
+      </View>
+    </View>
   );
 }

@@ -5,8 +5,12 @@ import {
   Alert,
   RefreshControl,
   View,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { router } from "expo-router";
+
+
 
 import { supabase } from "@/lib/supabaseClient";
 import GuideSection from "@/components/GuideSection";
@@ -14,7 +18,7 @@ import Loading from "@/components/Loading";
 import SearchField from "@/components/SearchField";
 
 import { useSupabase } from "@/utils/SupabaseProvider";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaInsets, useSafeAreaFrame } from "react-native-safe-area-context";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 
@@ -176,53 +180,58 @@ export default function HomeScreen() {
     : allGuides;
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        style={{ paddingTop: insets.top }}
-        contentContainerStyle={[
-          styles.scrollView,
-          { paddingBottom: 80 + insets.bottom } // Account for search bar height + safe area
-        ]}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={onRefresh} />
-        }
-      >
-        <GuideSection
-          title="Latest Guides"
-          subtitle="Previously generated guides by other users."
-          guides={filteredLatestGuides}
-          onGuidePress={handleGuidePress}
-        />
-        {/* {filteredAllGuides.length > 0 && (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    // keyboardVerticalOffset={Platform.OS === "ios" ? insets.top : 0}
+    >
+      <View style={styles.container}>
+        <ScrollView
+          style={{ paddingTop: insets.top }}
+          contentContainerStyle={[
+            styles.scrollView,
+            { paddingBottom: 80 + insets.bottom } // Account for search bar height + safe area
+          ]}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+          }
+        >
           <GuideSection
-            title="All Guides"
-            subtitle="Browse through all available guides."
-            guides={filteredAllGuides}
+            title="Latest Guides"
+            subtitle="Previously generated guides by other users."
+            guides={filteredLatestGuides}
             onGuidePress={handleGuidePress}
           />
-        )} */}
-      </ScrollView>
+          {/* {filteredAllGuides.length > 0 && (
+            <GuideSection
+              title="All Guides"
+              subtitle="Browse through all available guides."
+              guides={filteredAllGuides}
+              onGuidePress={handleGuidePress}
+            />
+          )} */}
+        </ScrollView>
 
-      <View style={[
-        styles.searchBarContainer,
-        {
-          backgroundColor: colors.background,
-          borderTopColor: colors.border,
+        <View style={[
+          styles.searchBarContainer,
+          {
+            backgroundColor: colors.background,
+            borderTopColor: colors.border,
+          }
+        ]}>
+          <SearchField
+            value={searchQuery}
+            onChangeText={handleSearch}
+            onSearch={handleSearch}
+            onGenerate={handleGenerate}
+            placeholder="Search or Generate"
+            showGenerateButton={true}
 
-        }
-      ]}>
-        <SearchField
-          value={searchQuery}
-          onChangeText={handleSearch}
-          onSearch={handleSearch}
-          onGenerate={handleGenerate}
-          placeholder="Search or Generate"
-          showGenerateButton={true}
-          style={styles.searchField}
-        />
+          />
+        </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -239,9 +248,5 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  searchField: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
-  }
+
 });

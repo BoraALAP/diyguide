@@ -10,8 +10,6 @@ import {
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-
-
 import Auth from "@/components/Auth";
 import ProfileHeader from "@/components/ProfileHeader";
 import ProfileSection from "@/components/ProfileSection";
@@ -21,6 +19,7 @@ import MenuButton from "@/components/MenuButton";
 
 import { useSupabase } from "@/utils/SupabaseProvider";
 import Colors from "@/constants/Colors";
+import { ScrollPageContainer } from "@/components/ScrollPageContainer";
 
 export default function ProfileScreen() {
   const { profile, loading, signOut, deleteUser, updateProfile } = useSupabase();
@@ -93,64 +92,56 @@ export default function ProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
+    <ScrollPageContainer onRefresh={handleRefresh}>
+      <View style={styles.content}>
+        {/* Profile Header */}
+        <ProfileHeader
+          avatarUrl={profile.avatar_url || ""}
+          name={profile.full_name || "Add your name"}
+          tokens={profile.tokens || 0}
+          onPurchasePress={handlePurchasePress}
+        />
 
-        contentContainerStyle={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
-        }
-      >
-        <View style={styles.content}>
-          {/* Profile Header */}
-          <ProfileHeader
-            avatarUrl={profile.avatar_url || ""}
-            name={profile.full_name || "Add your name"}
-            tokens={profile.tokens || 0}
-            onPurchasePress={handlePurchasePress}
+        {/* Profile Information Section */}
+        <ProfileSection
+          title="Profile"
+          actionLabel={isEditMode ? undefined : "Edit"}
+          onActionPress={handleEditPress}
+        >
+          <Input
+            label="First Name"
+            placeholder="Your first name"
+            value={isEditMode ? editedProfile.firstName : profile.first_name}
+            disabled={!isEditMode}
+            onChangeText={(text) =>
+              setEditedProfile(prev => ({ ...prev, firstName: text }))
+            }
           />
+          <Input
+            label="Last Name"
+            placeholder="Your last name"
+            value={isEditMode ? editedProfile.lastName : profile.last_name}
+            disabled={!isEditMode}
+            onChangeText={(text) =>
+              setEditedProfile(prev => ({ ...prev, lastName: text }))
+            }
+          />
+          <Input
+            label="Email"
+            placeholder="Your email"
+            value={profile.email}
+            disabled={true}
+          />
+          {isEditMode && (
+            <ProfileEditActions
+              onSavePress={handleSavePress}
+              onCancelPress={handleCancelPress}
+            />
+          )}
+        </ProfileSection>
 
-          {/* Profile Information Section */}
-          <ProfileSection
-            title="Profile"
-            actionLabel={isEditMode ? undefined : "Edit"}
-            onActionPress={handleEditPress}
-          >
-            <Input
-              label="First Name"
-              placeholder="Your first name"
-              value={isEditMode ? editedProfile.firstName : profile.first_name}
-              disabled={!isEditMode}
-              onChangeText={(text) =>
-                setEditedProfile(prev => ({ ...prev, firstName: text }))
-              }
-            />
-            <Input
-              label="Last Name"
-              placeholder="Your last name"
-              value={isEditMode ? editedProfile.lastName : profile.last_name}
-              disabled={!isEditMode}
-              onChangeText={(text) =>
-                setEditedProfile(prev => ({ ...prev, lastName: text }))
-              }
-            />
-            <Input
-              label="Email"
-              placeholder="Your email"
-              value={profile.email}
-              disabled={true}
-            />
-            {isEditMode && (
-              <ProfileEditActions
-                onSavePress={handleSavePress}
-                onCancelPress={handleCancelPress}
-              />
-            )}
-          </ProfileSection>
-
-          {/* Purchases Section */}
-          {/* <ProfileSection
+        {/* Purchases Section */}
+        {/* <ProfileSection
           title="Purchases"
           actionLabel="See All"
           onActionPress={handleSeeAllPress}
@@ -166,42 +157,30 @@ export default function ProfileScreen() {
           ))}
         </ProfileSection> */}
 
-          {/* Footer with Logout */}
-          <View style={[styles.footer, { borderColor: colors.borderSeperator }]}>
-            <MenuButton
-              title="Delete Account"
-              icon="warning-outline"
-              variant="destructive"
-              onPress={deleteUser}
-              disabled={loading}
-            />
-            <MenuButton
-              title="Logout"
-              icon="log-out-outline"
-              variant="destructive"
-              onPress={signOut}
-              disabled={loading}
-            />
-          </View>
+        {/* Footer with Logout */}
+        <View style={[styles.footer, { borderColor: colors.borderSeperator }]}>
+          <MenuButton
+            title="Delete Account"
+            icon="warning-outline"
+            variant="destructive"
+            onPress={deleteUser}
+            disabled={loading}
+          />
+          <MenuButton
+            title="Logout"
+            icon="log-out-outline"
+            variant="destructive"
+            onPress={signOut}
+            disabled={loading}
+          />
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    </ScrollPageContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
   content: {
-    paddingHorizontal: 16, // px-4 from Figma
-    paddingTop: 32, // Custom top padding
     gap: 24, // gap-6 from Figma
     flex: 1,
   },

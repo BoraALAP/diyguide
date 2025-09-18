@@ -17,6 +17,7 @@ import Loading from "@/components/Loading";
 import Colors from "@/constants/Colors";
 import { PageTitle } from "@/components/PageTitle";
 import { Card } from "@/components/Card";
+import { ScrollPageContainer } from "@/components/ScrollPageContainer";
 
 interface Category {
   id: string;
@@ -74,7 +75,7 @@ export default function CategoriesScreen() {
     fetchCategories();
   }, []);
 
-  const onRefresh = async () => {
+  const handleRefresh = async () => {
     await fetchCategories();
   };
 
@@ -93,42 +94,24 @@ export default function CategoriesScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.continer} edges={["top", "left", "right"]}>
-      <ScrollView
-        contentContainerStyle={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={onRefresh} />
-        }
-      >
+    <ScrollPageContainer onRefresh={handleRefresh} >
 
-        {/* Page Title */}
-        <PageTitle title="Categories" description="Previously generated guides by other users." />
+      {/* Page Title */}
+      <PageTitle title="Categories" description="Previously generated guides by other users." />
 
-        {/* Categories List */}
-        <Card>
-          {categories.map((category) => (
-            <CategoryItem
-              key={category.id}
-              categoryName={category.name}
-              colorIndicator={category.colorIndicator}
-              onPress={() => handleCategoryPress(category)}
-            />
-          ))}
-        </Card>
-      </ScrollView>
-    </SafeAreaView>
+      {/* Categories List */}
+      <Card>
+        {categories.map((category) => (
+          <CategoryItem
+            key={category.id}
+            categoryName={category.name}
+            colorIndicator={category.colorIndicator}
+            onPress={() => handleCategoryPress(category)}
+          />
+        ))}
+      </Card>
+    </ScrollPageContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  continer: {
-    flex: 1
-  },
-  scrollView: {
-    paddingHorizontal: 16, // px-4 from Figma
-    rowGap: 16,
-  },
 
-
-});

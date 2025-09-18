@@ -1,14 +1,14 @@
 // app/generate.tsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, ScrollView, StyleSheet, useColorScheme, ActivityIndicator, Pressable } from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
+import { View, StyleSheet, useColorScheme, ActivityIndicator, Pressable } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { fetch as expoFetch } from "expo/fetch";
 import * as Crypto from "expo-crypto";
 import { z } from "zod";
 import { supabase } from "@/lib/supabaseClient";
 import { useSupabase } from "@/utils/SupabaseProvider";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
@@ -17,6 +17,7 @@ import GuideHeader from "@/components/GuideHeader";
 import GuideStep from "@/components/GuideStep";
 import ResourceSection from "@/components/ResourceSection";
 import Typography from "@/components/Typography";
+import { ScrollPageContainer } from "@/components/ScrollPageContainer";
 
 
 // helper: allow "", null, undefined; only validate when non-empty
@@ -71,7 +72,6 @@ export default function GenerateScreen() {
   const colorScheme = useColorScheme() ?? "light";
   const colors = Colors[colorScheme];
 
-  const insets = useSafeAreaInsets();
   const { topic } = useLocalSearchParams<{ topic?: string }>();
   const { removeToken } = useSupabase();
 
@@ -239,133 +239,116 @@ export default function GenerateScreen() {
   }
 
   return (
-    <SafeAreaView
-      style={[styles.container]}
-      edges={["top", "left", "right"]}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Guide Header Section */}
-        {object && (
-          <View style={styles.section}>
-            <GuideHeader
-              title={object.title || "Generating..."}
-              description={object.content || "Loading description..."}
-              categories={categories}
-            />
+    <ScrollPageContainer header>
+      {/* Guide Header Section */}
+      {object && (
+        <View style={styles.section}>
+          <GuideHeader
+            title={object.title || "Generating..."}
+            description={object.content || "Loading description..."}
+            categories={categories}
+          />
 
-            {/* Materials and Tools Sections */}
-            {((object.tools?.length ?? 0) > 0 || (object.materials?.length ?? 0) > 0) && (
-              <View style={styles.resourcesContainer}>
-                {(object.materials?.length ?? 0) > 0 && (
-                  <ResourceSection
-                    title="Materials"
-                    items={object.materials?.filter((item): item is string => !!item) ?? []}
-                  />
-                )}
-                {(object.tools?.length ?? 0) > 0 && (
-                  <ResourceSection
-                    title="Tools"
-                    items={object.tools?.filter((item): item is string => !!item) ?? []}
-                  />
-                )}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Steps Section */}
-        {streamingSteps.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Typography
-                variant="h5"
-                weight="semiBold"
-                color={colors.text}
-              >
-                Steps
-              </Typography>
+          {/* Materials and Tools Sections */}
+          {((object.tools?.length ?? 0) > 0 || (object.materials?.length ?? 0) > 0) && (
+            <View style={styles.resourcesContainer}>
+              {(object.materials?.length ?? 0) > 0 && (
+                <ResourceSection
+                  title="Materials"
+                  items={object.materials?.filter((item): item is string => !!item) ?? []}
+                />
+              )}
+              {(object.tools?.length ?? 0) > 0 && (
+                <ResourceSection
+                  title="Tools"
+                  items={object.tools?.filter((item): item is string => !!item) ?? []}
+                />
+              )}
             </View>
+          )}
+        </View>
+      )}
 
-            <View style={styles.stepsContainer}>
-              {streamingSteps.map((step: any, index: number) => {
-                const key = step?.step ?? index + 1;
-                const imageUrl = step?.image_url ?? stepImages[key];
-
-                return (
-                  <GuideStep
-                    key={`step-${key}`}
-                    stepNumber={step.step || index + 1}
-                    title={`Step ${step.step || index + 1}`}
-                    description={step.description || "Loading step..."}
-                    imageUrl={imageUrl}
-                    loadingImage={!imageUrl && awaitingImages}
-                    materials={step.materials || []}
-                    tools={step.tools || []}
-                  />
-                );
-              })}
-            </View>
-          </View>
-        )}
-
-        {/* Tips Section */}
-        {(object?.tips?.length ?? 0) > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Typography
-                variant="h5"
-                weight="semiBold"
-                color={colors.text}
-              >
-                Tips
-              </Typography>
-            </View>
-            <View style={styles.tipsContainer}>
-              {object?.tips?.filter((tip): tip is string => !!tip).map((tip: string, index: number) => (
-                <View key={index} style={styles.tipItem}>
-                  <Typography variant="body" color={colors.secondaryText}>
-                    • {tip}
-                  </Typography>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* Error Display */}
-        {error && (
-          <View style={styles.errorContainer}>
-            <Ionicons name="alert-circle" size={48} color={colors.error} />
-            <Typography variant="body" color={colors.error}>
-              {String(error)}
+      {/* Steps Section */}
+      {streamingSteps.length > 0 && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Typography
+              variant="h5"
+              weight="semiBold"
+              color={colors.text}
+            >
+              Steps
             </Typography>
           </View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+
+          <View style={styles.stepsContainer}>
+            {streamingSteps.map((step: any, index: number) => {
+              const key = step?.step ?? index + 1;
+              const imageUrl = step?.image_url ?? stepImages[key];
+
+              return (
+                <GuideStep
+                  key={`step-${key}`}
+                  stepNumber={step.step || index + 1}
+                  title={`Step ${step.step || index + 1}`}
+                  description={step.description || "Loading step..."}
+                  imageUrl={imageUrl}
+                  loadingImage={!imageUrl && awaitingImages}
+                  materials={step.materials || []}
+                  tools={step.tools || []}
+                />
+              );
+            })}
+          </View>
+        </View>
+      )}
+
+      {/* Tips Section */}
+      {(object?.tips?.length ?? 0) > 0 && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Typography
+              variant="h5"
+              weight="semiBold"
+              color={colors.text}
+            >
+              Tips
+            </Typography>
+          </View>
+          <View style={styles.tipsContainer}>
+            {object?.tips?.filter((tip): tip is string => !!tip).map((tip: string, index: number) => (
+              <View key={index} style={styles.tipItem}>
+                <Typography variant="body" color={colors.secondaryText}>
+                  • {tip}
+                </Typography>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* Error Display */}
+      {error && (
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle" size={48} color={colors.error} />
+          <Typography variant="body" color={colors.error}>
+            {String(error)}
+          </Typography>
+        </View>
+      )}
+    </ScrollPageContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
 
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     gap: 16,
 
-  },
-
-
-  scrollContent: {
-    gap: 32,
-    paddingBottom: 32,
   },
   section: {
     gap: 16,

@@ -188,11 +188,11 @@ export default function HomeScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     // keyboardVerticalOffset={Platform.OS === "ios" ? insets.top : 0}
     >
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
         <ScrollView
-
           contentContainerStyle={[
             styles.scrollView,
+            { paddingTop: insets.top + 24 },
             { paddingBottom: insets.bottom } // Account for search bar height + safe area
           ]}
           showsVerticalScrollIndicator={false}
@@ -241,9 +241,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+
   },
   scrollView: {
     paddingHorizontal: 16,
+
   },
   searchBarContainer: {
     position: 'absolute',

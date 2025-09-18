@@ -10,7 +10,7 @@ import GuideStep from "@/components/GuideStep";
 import ResourceSection from "@/components/ResourceSection";
 import Typography from "@/components/Typography";
 import { getDefaultStackOptions } from "@/utils/navigationOptions";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { ScrollPageContainer } from "@/components/ScrollPageContainer";
 
 
 
@@ -20,7 +20,6 @@ export default function GuidePage() {
   const [error, setError] = useState<any>(null);
   const [info, setInfo] = useState<any>(null);
   const colorScheme = useColorScheme();
-  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const func = async () => {
@@ -74,88 +73,74 @@ export default function GuidePage() {
 
   if (error || !info) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
-        <Typography variant="body" color={Colors[colorScheme ?? "light"].text}>
-          {error ? "Error loading guide" : "Guide not found"}
-        </Typography>
-      </View>
+      <Loading />
     );
   }
   return (
     <>
       <Stack.Screen options={headerOptions} />
       <Suspense fallback={<Loading />}>
-        <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-          <ScrollView style={{ paddingTop: insets.top }} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-            {/* Guide Header */}
-            <View style={styles.section}>
-              <GuideHeader
-                title={info.title || "Guide Title"}
-                description={info.content || "Guide description"}
-                categories={info.guide_tags.tags}
-              />
+        <ScrollPageContainer header>
+          {/* Guide Header */}
+          <View style={styles.section}>
+            <GuideHeader
+              title={info.title || "Guide Title"}
+              description={info.content || "Guide description"}
+              categories={info.guide_tags.tags}
+            />
 
-              {/* Materials and Tools Sections */}
-              {(info.tools.length > 0 || info.materials.length > 0) && (
-                <View style={styles.resourcesContainer}>
-                  {info.materials.length > 0 && (
-                    <ResourceSection
-                      title="Materials"
-                      items={info.materials || []}
-                    />
-                  )}
-                  {info.tools.length > 0 && (
-                    <ResourceSection
-                      title="Tools"
-                      items={info.tools || []}
-                    />
-                  )}
-                </View>
-              )}
-            </View>
-
-            {/* Steps Section */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Typography
-                  variant="h5"
-                  weight="semiBold"
-                  color={Colors[colorScheme ?? "light"].text}
-                >
-                  Steps
-                </Typography>
-              </View>
-
-              <View style={styles.stepsContainer}>
-                {info.steps?.map((step: any, index: number) => (
-                  <GuideStep
-                    key={step.step || index}
-                    stepNumber={step.step || index + 1}
-                    title={step.title || "Title of the step"}
-                    description={step.description || "Step description"}
-                    imageUrl={fixImageUrl(step.image_url)}
-                    materials={step.materials || []}
-                    tools={step.tools || []}
+            {/* Materials and Tools Sections */}
+            {(info.tools.length > 0 || info.materials.length > 0) && (
+              <View style={styles.resourcesContainer}>
+                {info.materials.length > 0 && (
+                  <ResourceSection
+                    title="Materials"
+                    items={info.materials || []}
                   />
-                ))}
+                )}
+                {info.tools.length > 0 && (
+                  <ResourceSection
+                    title="Tools"
+                    items={info.tools || []}
+                  />
+                )}
               </View>
-            </View>
-          </ScrollView>
+            )}
+          </View>
 
-        </SafeAreaView>
+          {/* Steps Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Typography
+                variant="h5"
+                weight="semiBold"
+                color={Colors[colorScheme ?? "light"].text}
+              >
+                Steps
+              </Typography>
+            </View>
+
+            <View style={styles.stepsContainer}>
+              {info.steps?.map((step: any, index: number) => (
+                <GuideStep
+                  key={step.step || index}
+                  stepNumber={step.step || index + 1}
+                  title={step.title || "Title of the step"}
+                  description={step.description || "Step description"}
+                  imageUrl={fixImageUrl(step.image_url)}
+                  materials={step.materials || []}
+                  tools={step.tools || []}
+                />
+              ))}
+            </View>
+          </View>
+        </ScrollPageContainer>
       </Suspense>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    gap: 32,
-    paddingBottom: 32,
-  },
   section: {
     gap: 16,
   },

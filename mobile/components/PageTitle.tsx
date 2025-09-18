@@ -35,7 +35,6 @@ export const PageTitle = ({ title, description }: { title: string, description: 
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: 32,
     paddingHorizontal: 16, // px-4 from Figma
     gap: 4, // gap-1 from Figma
   },

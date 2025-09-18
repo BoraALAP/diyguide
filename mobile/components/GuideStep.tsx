@@ -3,7 +3,7 @@
  * optional materials/tools sections. Features step numbering and card layout.
  */
 import React from "react";
-import { View, StyleSheet, Image, ImageProps } from "react-native";
+import { View, StyleSheet, Image, ActivityIndicator } from "react-native";
 import Typography from "./Typography";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "./useColorScheme";
@@ -13,6 +13,7 @@ interface GuideStepProps {
   title: string;
   description: string;
   imageUrl?: string | undefined | null;
+  loadingImage?: boolean;
   materials?: string[];
   tools?: string[];
   style?: any;
@@ -23,6 +24,7 @@ const GuideStep: React.FC<GuideStepProps> = ({
   title,
   description,
   imageUrl,
+  loadingImage = false,
   materials = [],
   tools = [],
   style,
@@ -61,13 +63,23 @@ const GuideStep: React.FC<GuideStepProps> = ({
     <View>
       <View style={[styles.container, { backgroundColor: colors.cardBackground }, style]}>
         {/* Step Image */}
-        {imageUrl && (
+        {imageUrl ? (
           <Image
             source={{ uri: imageUrl }}
             style={styles.stepImage}
             resizeMode="cover"
           />
-        )}
+        ) : loadingImage ? (
+          <View
+            style={[
+              styles.stepImage,
+              styles.imageSkeleton,
+              { backgroundColor: colors.disabledBackground },
+            ]}
+          >
+            <ActivityIndicator color={colors.secondaryText} />
+          </View>
+        ) : null}
 
         {/* Content */}
         <View style={styles.content}>
@@ -123,6 +135,10 @@ const styles = StyleSheet.create({
   stepImage: {
     width: "100%",
     height: 258,
+  },
+  imageSkeleton: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   content: {
     paddingTop: 24,

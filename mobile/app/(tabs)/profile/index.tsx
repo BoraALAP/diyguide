@@ -3,13 +3,13 @@ import {
   ScrollView,
   StyleSheet,
   RefreshControl,
-  Pressable,
+
   View,
   useColorScheme,
 } from "react-native";
 import { router } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 
 import Auth from "@/components/Auth";
@@ -17,7 +17,6 @@ import ProfileHeader from "@/components/ProfileHeader";
 import ProfileSection from "@/components/ProfileSection";
 import Input from "@/components/Input";
 import ProfileEditActions from "@/components/ProfileEditActions";
-import PurchaseItem from "@/components/PurchaseItem";
 import MenuButton from "@/components/MenuButton";
 
 import { useSupabase } from "@/utils/SupabaseProvider";
@@ -25,7 +24,6 @@ import Colors from "@/constants/Colors";
 
 export default function ProfileScreen() {
   const { profile, loading, signOut, deleteUser, updateProfile } = useSupabase();
-  const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const [isEditMode, setIsEditMode] = React.useState(false);
@@ -95,63 +93,64 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ScrollView
-      style={{ paddingTop: insets.top }}
-      contentContainerStyle={styles.scrollView}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
-      }
-    >
-      <View style={styles.content}>
-        {/* Profile Header */}
-        <ProfileHeader
-          avatarUrl={profile.avatar_url || ""}
-          name={profile.full_name || "Add your name"}
-          tokens={profile.tokens || 0}
-          onPurchasePress={handlePurchasePress}
-        />
+    <SafeAreaView style={styles.container}>
+      <ScrollView
 
-        {/* Profile Information Section */}
-        <ProfileSection
-          title="Profile"
-          actionLabel={isEditMode ? undefined : "Edit"}
-          onActionPress={handleEditPress}
-        >
-          <Input
-            label="First Name"
-            placeholder="Your first name"
-            value={isEditMode ? editedProfile.firstName : profile.first_name}
-            disabled={!isEditMode}
-            onChangeText={(text) =>
-              setEditedProfile(prev => ({ ...prev, firstName: text }))
-            }
+        contentContainerStyle={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
+        }
+      >
+        <View style={styles.content}>
+          {/* Profile Header */}
+          <ProfileHeader
+            avatarUrl={profile.avatar_url || ""}
+            name={profile.full_name || "Add your name"}
+            tokens={profile.tokens || 0}
+            onPurchasePress={handlePurchasePress}
           />
-          <Input
-            label="Last Name"
-            placeholder="Your last name"
-            value={isEditMode ? editedProfile.lastName : profile.last_name}
-            disabled={!isEditMode}
-            onChangeText={(text) =>
-              setEditedProfile(prev => ({ ...prev, lastName: text }))
-            }
-          />
-          <Input
-            label="Email"
-            placeholder="Your email"
-            value={profile.email}
-            disabled={true}
-          />
-          {isEditMode && (
-            <ProfileEditActions
-              onSavePress={handleSavePress}
-              onCancelPress={handleCancelPress}
+
+          {/* Profile Information Section */}
+          <ProfileSection
+            title="Profile"
+            actionLabel={isEditMode ? undefined : "Edit"}
+            onActionPress={handleEditPress}
+          >
+            <Input
+              label="First Name"
+              placeholder="Your first name"
+              value={isEditMode ? editedProfile.firstName : profile.first_name}
+              disabled={!isEditMode}
+              onChangeText={(text) =>
+                setEditedProfile(prev => ({ ...prev, firstName: text }))
+              }
             />
-          )}
-        </ProfileSection>
+            <Input
+              label="Last Name"
+              placeholder="Your last name"
+              value={isEditMode ? editedProfile.lastName : profile.last_name}
+              disabled={!isEditMode}
+              onChangeText={(text) =>
+                setEditedProfile(prev => ({ ...prev, lastName: text }))
+              }
+            />
+            <Input
+              label="Email"
+              placeholder="Your email"
+              value={profile.email}
+              disabled={true}
+            />
+            {isEditMode && (
+              <ProfileEditActions
+                onSavePress={handleSavePress}
+                onCancelPress={handleCancelPress}
+              />
+            )}
+          </ProfileSection>
 
-        {/* Purchases Section */}
-        {/* <ProfileSection
+          {/* Purchases Section */}
+          {/* <ProfileSection
           title="Purchases"
           actionLabel="See All"
           onActionPress={handleSeeAllPress}
@@ -167,28 +166,26 @@ export default function ProfileScreen() {
           ))}
         </ProfileSection> */}
 
-        {/* Footer with Logout */}
-        <View style={[styles.footer, { borderColor: colors.borderSeperator }]}>
-          <MenuButton
-            title="Delete Account"
-            icon="warning-outline"
-            variant="destructive"
-            onPress={deleteUser}
-            disabled={loading}
-          />
-          <MenuButton
-            title="Logout"
-            icon="log-out-outline"
-            variant="destructive"
-            onPress={signOut}
-            disabled={loading}
-          />
+          {/* Footer with Logout */}
+          <View style={[styles.footer, { borderColor: colors.borderSeperator }]}>
+            <MenuButton
+              title="Delete Account"
+              icon="warning-outline"
+              variant="destructive"
+              onPress={deleteUser}
+              disabled={loading}
+            />
+            <MenuButton
+              title="Logout"
+              icon="log-out-outline"
+              variant="destructive"
+              onPress={signOut}
+              disabled={loading}
+            />
+          </View>
         </View>
-      </View>
-
-
-
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

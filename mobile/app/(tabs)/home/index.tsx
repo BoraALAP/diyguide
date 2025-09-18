@@ -19,7 +19,7 @@ import Loading from "@/components/Loading";
 import SearchField from "@/components/SearchField";
 
 import { useSupabase } from "@/utils/SupabaseProvider";
-import { useSafeAreaInsets, useSafeAreaFrame } from "react-native-safe-area-context";
+import { useSafeAreaInsets, SafeAreaView } from "react-native-safe-area-context";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 
@@ -188,12 +188,12 @@ export default function HomeScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     // keyboardVerticalOffset={Platform.OS === "ios" ? insets.top : 0}
     >
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <ScrollView
-          style={{ paddingTop: insets.top }}
+
           contentContainerStyle={[
             styles.scrollView,
-            { paddingBottom: 80 + insets.bottom } // Account for search bar height + safe area
+            { paddingBottom: insets.bottom } // Account for search bar height + safe area
           ]}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -233,7 +233,7 @@ export default function HomeScreen() {
 
           />
         </View>
-      </View>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 }

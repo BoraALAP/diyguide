@@ -1,5 +1,5 @@
 // app/generate.tsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View, ScrollView, StyleSheet, useColorScheme, ActivityIndicator, Pressable } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
@@ -8,8 +8,9 @@ import * as Crypto from "expo-crypto";
 import { z } from "zod";
 import { supabase } from "@/lib/supabaseClient";
 import { useSupabase } from "@/utils/SupabaseProvider";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 
 import Colors from "@/constants/Colors";
 import GuideHeader from "@/components/GuideHeader";
@@ -69,14 +70,38 @@ async function waitForSavedId(sessionId: string, timeoutMs = 30000) {
 export default function GenerateScreen() {
   const colorScheme = useColorScheme() ?? "light";
   const colors = Colors[colorScheme];
-  const styles = useMemo(() => makeStyles(colorScheme), [colorScheme]);
+
   const insets = useSafeAreaInsets();
   const { topic } = useLocalSearchParams<{ topic?: string }>();
   const { removeToken } = useSupabase();
 
   const [navigated, setNavigated] = useState(false);
+  const [guideId, setGuideId] = useState<number | null>(null);
+  const [stepImages, setStepImages] = useState<Record<number, string>>({});
   const sessionIdRef = useRef(Crypto.randomUUID());
   const [authHeader, setAuthHeader] = useState<string | null>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const hasSubscribedRef = useRef(false);
+
+  const updateStepImages = useCallback((incoming: any[] | undefined) => {
+    if (!Array.isArray(incoming) || incoming.length === 0) return;
+
+    setStepImages((prev) => {
+      let changed = false;
+      const next = { ...prev };
+
+      incoming.forEach((step, index) => {
+        const key = step?.step ?? index + 1;
+        const imageUrl = step?.image_url;
+        if (imageUrl && next[key] !== imageUrl) {
+          next[key] = imageUrl;
+          changed = true;
+        }
+      });
+
+      return changed ? next : prev;
+    });
+  }, []);
 
   // Get the user's access token so the Edge Function can apply RLS as the user.
   useEffect(() => {
@@ -103,6 +128,18 @@ export default function GenerateScreen() {
     onFinish: async () => {
       // After streaming completes, the function inserts the row.
       const id = await waitForSavedId(sessionIdRef.current);
+
+      if (id) {
+        setGuideId(id);
+        const { data: savedGuide } = await supabase
+          .from("guides")
+          .select("steps")
+          .eq("id", id)
+          .maybeSingle();
+
+        updateStepImages(savedGuide?.steps);
+      }
+
       if (id && !navigated) {
         setNavigated(true);
         await removeToken().catch(() => { });
@@ -114,6 +151,58 @@ export default function GenerateScreen() {
       }
     },
   });
+
+  // Whenever the topic changes, reset local state and close any existing subscription.
+  useEffect(() => {
+    setGuideId(null);
+    setStepImages({});
+    setNavigated(false);
+    hasSubscribedRef.current = false;
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+  }, [topic]);
+
+  // Subscribe to realtime updates for the generated guide so images apply in-place.
+  useEffect(() => {
+    if (!guideId || hasSubscribedRef.current) return;
+
+    const channel = supabase
+      .channel(`guide-${guideId}-updates`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "guides",
+          filter: `id=eq.${guideId}`,
+        },
+        (payload) => {
+          updateStepImages((payload.new as any)?.steps);
+        }
+      )
+      .subscribe();
+
+    hasSubscribedRef.current = true;
+    channelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+      channelRef.current = null;
+      hasSubscribedRef.current = false;
+    };
+  }, [guideId, updateStepImages]);
+
+  useEffect(() => {
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+      hasSubscribedRef.current = false;
+    };
+  }, []);
 
   // Start generation when we have both topic and headers
   useEffect(() => {
@@ -128,9 +217,19 @@ export default function GenerateScreen() {
     color: colors.tint,
   })) || [];
 
+  const streamingSteps = object?.steps ?? [];
+  const awaitingImages = streamingSteps.some((step: any, index: number) => {
+    const key = step?.step ?? index + 1;
+    return !(step?.image_url || stepImages[key]);
+  });
+
   if (!object && !error) {
     return (
-      <View style={styles.loadingContainer}>
+      <View
+        style={[
+          styles.loadingContainer
+        ]}
+      >
         <ActivityIndicator size="large" color={colors.tint} />
         <Typography variant="body" color={colors.secondaryText}>
           Generating You Guide...
@@ -140,25 +239,9 @@ export default function GenerateScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      {/* Header Bar with Back/Stop button */}
-      <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
-        <Pressable
-          onPress={isLoading ? stop : () => router.back()}
-          style={styles.backButton}
-        >
-          <Ionicons
-            name={isLoading ? "stop-circle-outline" : "arrow-back"}
-            size={24}
-            color={colors.text}
-          />
-        </Pressable>
-        <Typography variant="h5" weight="semiBold" color={colors.text}>
-          {isLoading ? "Creating Response..." : "Guide Generated"}
-        </Typography>
-        <View style={{ width: 24 }} />
-      </View>
-
+    <SafeAreaView
+      style={[styles.container]}
+    >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -193,7 +276,7 @@ export default function GenerateScreen() {
         )}
 
         {/* Steps Section */}
-        {(object?.steps?.length ?? 0) > 0 && (
+        {streamingSteps.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Typography
@@ -206,17 +289,23 @@ export default function GenerateScreen() {
             </View>
 
             <View style={styles.stepsContainer}>
-              {object?.steps?.map((step: any, index: number) => (
-                <GuideStep
-                  key={step.step || index}
-                  stepNumber={step.step || index + 1}
-                  title={`Step ${step.step || index + 1}`}
-                  description={step.description || "Loading step..."}
-                  imageUrl={step.image_url}
-                  materials={step.materials || []}
-                  tools={step.tools || []}
-                />
-              ))}
+              {streamingSteps.map((step: any, index: number) => {
+                const key = step?.step ?? index + 1;
+                const imageUrl = step?.image_url ?? stepImages[key];
+
+                return (
+                  <GuideStep
+                    key={`step-${key}`}
+                    stepNumber={step.step || index + 1}
+                    title={`Step ${step.step || index + 1}`}
+                    description={step.description || "Loading step..."}
+                    imageUrl={imageUrl}
+                    loadingImage={!imageUrl && awaitingImages}
+                    materials={step.materials || []}
+                    tools={step.tools || []}
+                  />
+                );
+              })}
             </View>
           </View>
         )}
@@ -255,69 +344,52 @@ export default function GenerateScreen() {
           </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
-const makeStyles = (mode: "light" | "dark") => {
-  const colors = Colors[mode];
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
 
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.pageBackground,
-    },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      gap: 16,
-      backgroundColor: colors.pageBackground,
-    },
-    headerBar: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: 16,
-      paddingBottom: 16,
-      backgroundColor: colors.background,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-    },
-    backButton: {
-      padding: 4,
-    },
-    scrollContent: {
-      gap: 32,
-      paddingBottom: 24,
-      paddingTop: 16,
-    },
-    section: {
-      gap: 16,
-    },
-    sectionHeader: {
-      paddingHorizontal: 16,
-    },
-    resourcesContainer: {
-      paddingHorizontal: 16,
-      gap: 8,
-    },
-    stepsContainer: {
-      gap: 24,
-      paddingHorizontal: 16,
-    },
-    tipsContainer: {
-      paddingHorizontal: 16,
-      gap: 8,
-    },
-    tipItem: {
-      paddingVertical: 4,
-    },
-    errorContainer: {
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 16,
-      padding: 32,
-    },
-  });
-};
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+
+  },
+
+
+  scrollContent: {
+    gap: 32,
+  },
+  section: {
+    gap: 16,
+  },
+  sectionHeader: {
+    paddingHorizontal: 16,
+  },
+  resourcesContainer: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  stepsContainer: {
+    gap: 24,
+    paddingHorizontal: 16,
+  },
+  tipsContainer: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  tipItem: {
+    paddingVertical: 4,
+  },
+  errorContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    padding: 32,
+  },
+});

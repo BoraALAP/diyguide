@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { supabase } from "@/lib/supabaseClient";
 import GuideListItem from "@/components/GuideListItem";
@@ -84,38 +84,42 @@ export default function CategoryGuidesScreen() {
   }
 
   return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        style={{ paddingTop: insets.top }}
+        contentContainerStyle={
+          styles.scrollView
+        }
 
-    <ScrollView
-      style={{ paddingTop: insets.top }}
-      contentContainerStyle={
-        styles.scrollView
-      }
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+        }
+      >
+        <Card>
+          {guides.map((guide) => (
+            <GuideListItem
+              key={guide.id}
+              title={guide.title}
+              steps={guide.steps}
+              onPress={() => handleGuidePress(guide)}
+            />
+          ))}
+        </Card>
 
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={loading} onRefresh={onRefresh} />
-      }
-    >
-      <Card>
-        {guides.map((guide) => (
-          <GuideListItem
-            key={guide.id}
-            title={guide.title}
-            steps={guide.steps}
-            onPress={() => handleGuidePress(guide)}
-          />
-        ))}
-      </Card>
-
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
 
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
   scrollView: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingTop: 48, // Custom top padding
+
   },
 });

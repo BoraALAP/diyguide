@@ -10,36 +10,9 @@ import GuideStep from "@/components/GuideStep";
 import ResourceSection from "@/components/ResourceSection";
 import Typography from "@/components/Typography";
 import { getDefaultStackOptions } from "@/utils/navigationOptions";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
-const getThemedStyles = (colorScheme: "light" | "dark" | null) => {
-  const colors = Colors[colorScheme ?? "light"];
 
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.pageBackground,
-    },
-    content: {
-      gap: 32,
-      paddingBottom: 24,
-      paddingTop: 129, // Account for top navigation
-    },
-    section: {
-      gap: 16,
-    },
-    sectionHeader: {
-      paddingHorizontal: 16,
-    },
-    stepsContainer: {
-      gap: 24,
-      paddingHorizontal: 16,
-    },
-    resourcesContainer: {
-      paddingHorizontal: 16,
-      gap: 8,
-    },
-  });
-};
 
 export default function GuidePage() {
   const { guide } = useLocalSearchParams();
@@ -47,6 +20,7 @@ export default function GuidePage() {
   const [error, setError] = useState<any>(null);
   const [info, setInfo] = useState<any>(null);
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const func = async () => {
@@ -67,7 +41,7 @@ export default function GuidePage() {
     func();
   }, []);
 
-  const styles = getThemedStyles(colorScheme ?? "light");
+
   const headerOptions = useMemo(
     () => getDefaultStackOptions(colorScheme),
     [colorScheme]
@@ -111,8 +85,8 @@ export default function GuidePage() {
     <>
       <Stack.Screen options={headerOptions} />
       <Suspense fallback={<Loading />}>
-        <View style={styles.container}>
-          <ScrollView contentContainerStyle={styles.content}>
+        <SafeAreaView style={styles.container}>
+          <ScrollView style={{ paddingTop: insets.top }} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
             {/* Guide Header */}
             <View style={styles.section}>
               <GuideHeader
@@ -167,8 +141,32 @@ export default function GuidePage() {
               </View>
             </View>
           </ScrollView>
-        </View>
+
+        </SafeAreaView>
       </Suspense>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    gap: 32,
+  },
+  section: {
+    gap: 16,
+  },
+  sectionHeader: {
+    paddingHorizontal: 16,
+  },
+  stepsContainer: {
+    gap: 24,
+    paddingHorizontal: 16,
+  },
+  resourcesContainer: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+});

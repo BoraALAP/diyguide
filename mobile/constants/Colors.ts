@@ -1,6 +1,7 @@
 // Primary colors from Figma variables
 const primaryColor = "hsl(193, 100%, 30%)"; // #007399
 const primaryDarkColor = "hsl(200, 100%, 20%)"; // #004c66
+const primaryLightColor = "hsl(200, 100%, 70%)"; // #004c66
 const tintColorLight = primaryColor;
 const tintColorDark = "hsl(193, 100%, 68%)"; // lighter version for dark mode
 
@@ -18,7 +19,10 @@ export default {
     searchBarBackground: "hsla(0, 0%, 94%, 0.7)", // #efefefb2 - BG/SearchBar
     bottomNavBackground: "hsla(0, 0%, 100%, 0.5)", // #ffffff80 - BG/BottomNav
     badgeBackground: "hsl(0, 0%, 100%)", // #ffffff - BG/Badge
-    pageBackground: "hsl(0, 0%, 97%)",
+    pageBackground: "hsl(0, 0%, 95%)",
+    cardBackground: "hsl(0, 0%, 100%)",
+    sectionBackground: "hsl(193, 100%, 85%)",
+    headerBackground: "hsla(0, 0%, 0%, 0.0)",
 
     // Input backgrounds from Figma
     inputBackground: "hsl(0, 0%, 100%)", // #ffffff - BG/Input/Default
@@ -41,9 +45,6 @@ export default {
     // Legacy colors (keeping for compatibility)
     tabIconDefault: "hsl(0, 0%, 40%)",
     tabIconSelected: tintColorLight,
-    cardBackground: "hsl(0, 0%, 100%)",
-    sectionBackground: "hsl(193, 100%, 85%)",
-    headerBackground: "hsla(0, 0%, 100%, 0.25)",
     error: "hsl(0, 100%, 30%)",
     selectedPackage: "hsl(193, 100%, 85%)",
     selectedPackageBorder: tintColorLight,
@@ -64,6 +65,9 @@ export default {
     bottomNavBackground: "hsla(0, 0%, 0%, 0.5)",
     badgeBackground: "hsl(0, 0%, 20%)",
     pageBackground: "hsl(0, 0%, 20%)",
+    cardBackground: "hsl(0, 0%, 15%)",
+    sectionBackground: "hsl(193, 100%, 17%)",
+    headerBackground: "hsla(0, 0%, 100%, 0.0)",
 
     // Input backgrounds (dark mode)
     inputBackground: "hsl(0, 0%, 15%)",
@@ -82,14 +86,11 @@ export default {
     // Theme colors
     tint: tintColorDark,
     primary: tintColorDark,
-    primaryDark: primaryDarkColor,
+    primaryDark: primaryLightColor,
 
     // Legacy colors (dark mode)
     tabIconDefault: "hsl(0, 0%, 70%)",
     tabIconSelected: tintColorDark,
-    cardBackground: "hsl(0, 0%, 19%)",
-    sectionBackground: "hsl(193, 100%, 17%)",
-    headerBackground: "hsla(0, 0%, 0%, 0.25)",
     error: "hsl(0, 100%, 70%)",
     selectedPackage: "hsl(193, 100%, 25%)",
     selectedPackageBorder: tintColorDark,

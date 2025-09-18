@@ -1,6 +1,6 @@
-import React, { Suspense, useState, useEffect } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { View, StyleSheet, useColorScheme, ScrollView } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { supabase } from "@/lib/supabaseClient";
 
 import Colors from "@/constants/Colors";
@@ -9,6 +9,7 @@ import GuideHeader from "@/components/GuideHeader";
 import GuideStep from "@/components/GuideStep";
 import ResourceSection from "@/components/ResourceSection";
 import Typography from "@/components/Typography";
+import { getDefaultStackOptions } from "@/utils/navigationOptions";
 
 const getThemedStyles = (colorScheme: "light" | "dark" | null) => {
   const colors = Colors[colorScheme ?? "light"];
@@ -67,6 +68,10 @@ export default function GuidePage() {
   }, []);
 
   const styles = getThemedStyles(colorScheme ?? "light");
+  const headerOptions = useMemo(
+    () => getDefaultStackOptions(colorScheme),
+    [colorScheme]
+  );
 
   const fixImageUrl = (uri: string | undefined | null) => {
     if (!uri) return uri;
@@ -102,64 +107,68 @@ export default function GuidePage() {
       </View>
     );
   }
-
-
-
   return (
-    <Suspense fallback={<Loading />}>
-      <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.content}>
-          {/* Guide Header */}
-          <View style={styles.section}>
-            <GuideHeader
-              title={info.title || "Guide Title"}
-              description={info.content || "Guide description"}
-              categories={info.guide_tags.tags}
-            />
+    <>
+      <Stack.Screen options={headerOptions} />
+      <Suspense fallback={<Loading />}>
+        <View style={styles.container}>
+          <ScrollView contentContainerStyle={styles.content}>
+            {/* Guide Header */}
+            <View style={styles.section}>
+              <GuideHeader
+                title={info.title || "Guide Title"}
+                description={info.content || "Guide description"}
+                categories={info.guide_tags.tags}
+              />
 
-            {/* Materials and Tools Sections */}
-            {(info.tools.length > 0 || info.materials.length > 0) && (
-              <View style={styles.resourcesContainer}>
-                {info.materials.length > 0 && (<ResourceSection
-                  title="Materials"
-                  items={info.materials || []}
-                />)}
-                {info.tools.length > 0 && (<ResourceSection
-                  title="Tools"
-                  items={info.tools || []}
-                />)}
+              {/* Materials and Tools Sections */}
+              {(info.tools.length > 0 || info.materials.length > 0) && (
+                <View style={styles.resourcesContainer}>
+                  {info.materials.length > 0 && (
+                    <ResourceSection
+                      title="Materials"
+                      items={info.materials || []}
+                    />
+                  )}
+                  {info.tools.length > 0 && (
+                    <ResourceSection
+                      title="Tools"
+                      items={info.tools || []}
+                    />
+                  )}
+                </View>
+              )}
+            </View>
+
+            {/* Steps Section */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Typography
+                  variant="h5"
+                  weight="semiBold"
+                  color={Colors[colorScheme ?? "light"].text}
+                >
+                  Steps
+                </Typography>
               </View>
-            )}
-          </View>
 
-          {/* Steps Section */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Typography
-                variant="h5"
-                weight="semiBold"
-                color={Colors[colorScheme ?? "light"].text}
-              >
-                Steps
-              </Typography>
+              <View style={styles.stepsContainer}>
+                {info.steps?.map((step: any, index: number) => (
+                  <GuideStep
+                    key={step.step || index}
+                    stepNumber={step.step || index + 1}
+                    title={step.title || "Title of the step"}
+                    description={step.description || "Step description"}
+                    imageUrl={fixImageUrl(step.image_url)}
+                    materials={step.materials || []}
+                    tools={step.tools || []}
+                  />
+                ))}
+              </View>
             </View>
-
-            <View style={styles.stepsContainer}>
-              {info.steps?.map((step: any, index: number) => (
-                <GuideStep
-                  key={step.step || index}
-                  stepNumber={step.step || index + 1}
-                  title={step.title || "Title of the step"}
-                  description={step.description || "Step description"}
-                  imageUrl={fixImageUrl(step.image_url)}
-                  materials={step.materials || []}
-                  tools={step.tools || []}
-                />
-              ))}
-            </View>
-          </View>
-        </ScrollView>
-      </View>
-    </Suspense>
+          </ScrollView>
+        </View>
+      </Suspense>
+    </>
   );
 }

@@ -12,6 +12,7 @@ import { router } from "expo-router";
 
 
 
+
 import { supabase } from "@/lib/supabaseClient";
 import GuideSection from "@/components/GuideSection";
 import Loading from "@/components/Loading";
@@ -43,6 +44,8 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const insets = useSafeAreaInsets();
+
+
 
   const fetchLatestGuides = async () => {
     setLoading(true);

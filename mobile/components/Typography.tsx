@@ -58,12 +58,7 @@ export type VariantName =
   | "h5"
   | "h6"
   | "body"
-  | "body1"
-  | "body2"
-  | "subtitle1"
-  | "subtitle2"
   | "caption"
-  | "captionSm"
   | "label"
   | "button";
 
@@ -86,12 +81,7 @@ const VARIANT_DEFAULTS: VariantDefaults = {
   h5: { font: "lexend", weight: "regular" },
   h6: { font: "lexend", weight: "medium" },
   body: { font: "lexend", weight: "regular" },
-  body1: { font: "lexend", weight: "regular" },
-  body2: { font: "lexend", weight: "regular" },
-  subtitle1: { font: "lexend", weight: "regular" },
-  subtitle2: { font: "lexend", weight: "regular" },
   caption: { font: "lexend", weight: "regular" },
-  captionSm: { font: "lexend", weight: "light" },
   label: { font: "lexend", weight: "light" },
   button: { font: "lexend", weight: "regular" },
 };
@@ -174,12 +164,7 @@ const variantComponents = {
   H5: createVariantComponent("h5"),
   H6: createVariantComponent("h6"),
   Body: createVariantComponent("body"),
-  Body1: createVariantComponent("body1"),
-  Body2: createVariantComponent("body2"),
-  Subtitle1: createVariantComponent("subtitle1"),
-  Subtitle2: createVariantComponent("subtitle2"),
   Caption: createVariantComponent("caption"),
-  CaptionSm: createVariantComponent("captionSm"),
   Label: createVariantComponent("label"),
   Button: createVariantComponent("button"),
 } as const;
@@ -193,70 +178,48 @@ const Typography = Object.assign(BaseTypography, variantComponents) as Typograph
 const styles = StyleSheet.create(
   {
     h1: {
-      fontSize: 24,
-      lineHeight: 30,
+      fontSize: 28,
+      lineHeight: 42,
     },
     h2: {
       // From Figma: Literata SemiBold 21px
-      fontSize: 21,
-      lineHeight: 26,
+      fontSize: 24,
+      lineHeight: 36,
     },
     h3: {
       // From Figma: Lexend Bold 16px
-      fontSize: 17,
-      lineHeight: 21,
+      fontSize: 21,
+      lineHeight: 28,
     },
     h4: {
-      fontSize: 16,
-      lineHeight: 20,
+      fontSize: 20,
+      lineHeight: 30,
     },
     h5: {
-      fontSize: 14,
-      lineHeight: 17,
+      fontSize: 17,
+      lineHeight: 26,
     },
     h6: {
       // From Figma: Lexend Medium 14px
-      fontSize: 14,
-      lineHeight: 17,
+      fontSize: 16,
+      lineHeight: 24,
     },
     body: {
       // From Figma: Lexend Regular 14px with 1.5 line height
-      fontSize: 14,
-      lineHeight: 21,
-    },
-    body1: {
-      fontSize: 16,
-      lineHeight: 24,
-    },
-    body2: {
-      fontSize: 14,
-      lineHeight: 20,
-    },
-    subtitle1: {
-      fontSize: 16,
-      lineHeight: 24,
-    },
-    subtitle2: {
-      fontSize: 14,
-      lineHeight: 20,
+      fontSize: 15,
+      lineHeight: 18,
     },
     caption: {
       fontSize: 12,
       lineHeight: 16,
     },
-    captionSm: {
-      // From Figma: Lexend Light 11px with 1.5 line height
-      fontSize: 11,
-      lineHeight: 16.5,
-    },
     label: {
-      // From Figma: Lexend Light 11px
-      fontSize: 11,
-      lineHeight: 11,
+      fontSize: 14,
+      lineHeight: 18,
     },
     button: {
       fontSize: 14,
-      lineHeight: 20,
+      lineHeight: 18,
       textTransform: "uppercase",
       letterSpacing: 1,
     },

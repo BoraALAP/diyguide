@@ -56,43 +56,43 @@ const Input: React.FC<InputProps> = ({
       borderRadius: 8,
       paddingHorizontal: 16,
       paddingVertical: 8,
-      backgroundColor: "#ffffff",
-      borderColor: "#cccccc",
+      backgroundColor: colors.background,
+      borderColor: colors.border,
     };
 
     if (error) {
       return {
         ...baseStyle,
-        borderColor: colors.error || "#cc0000",
-        backgroundColor: "#ffffff",
+        borderColor: colors.error,
+
       };
     }
 
     if (disabled) {
       return {
         ...baseStyle,
-        backgroundColor: "#f0f0f0", // BG/Input/Disabled
-        borderColor: isDisabledEmpty ? "#d9d9d9" : "#cccccc", // Border/Input vs Border/Input/Filled
+        backgroundColor: colors.inputBackgroundDisabled, // BG/Input/Disabled
+        borderColor: isDisabledEmpty ? colors.border : colors.border, // Border/Input vs Border/Input/Filled
       };
     }
 
     if (isFocused) {
       return {
         ...baseStyle,
-        borderColor: colors.primaryDark || "#004c66", // Primary-Dark for active state
+        borderColor: colors.primaryDark, // Primary-Dark for active state
         borderWidth: 1,
       };
     }
 
     return {
       ...baseStyle,
-      borderColor: hasValue ? "#cccccc" : "#d9d9d9", // Border/Input/Filled vs Border/Input
+      borderColor: hasValue ? colors.borderInputFilled : colors.border, // Border/Input/Filled vs Border/Input
     };
   };
 
   const getLabelColor = () => {
-    if (error) return colors.error || "#cc0000";
-    if (isFocused) return colors.primaryDark || "#004c66";
+    if (error) return colors.error;
+    if (isFocused) return colors.primaryDark;
     return colors.secondaryText;
   };
 
@@ -142,7 +142,7 @@ const Input: React.FC<InputProps> = ({
         <Typography
           variant="label"
           weight="light"
-          color={error ? colors.error || "#cc0000" : colors.secondaryText}
+          color={error ? colors.error : colors.secondaryText}
           style={styles.helperText}
         >
           {error || helperText}

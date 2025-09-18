@@ -250,7 +250,10 @@ export default function Auth() {
         </View>
       </View>
       <View style={styles.versionContainer}>
-        <Text>update Id: {Updates.updateId}</Text>
+        <Text>Runtime Version: {Updates.runtimeVersion}</Text>
+      </View>
+      <View style={styles.versionContainer}>
+        <Text>Update Id: {Updates.updateId}</Text>
       </View>
     </ScrollView>
   );

@@ -64,7 +64,7 @@ const GuideItem: React.FC<GuideItemProps> = ({
                         ]}
                       />
                       <Typography
-                        variant="captionSm"
+                        variant="caption"
                         color={colors.secondaryText}
                         style={styles.category}
                         numberOfLines={1}
@@ -75,7 +75,7 @@ const GuideItem: React.FC<GuideItemProps> = ({
                   ))}
                   {tags.length > 2 && (
                     <Typography
-                      variant="captionSm"
+                      variant="caption"
                       color={colors.secondaryText}
                       style={styles.moreChip}
                       numberOfLines={1}
@@ -93,7 +93,7 @@ const GuideItem: React.FC<GuideItemProps> = ({
                     ]}
                   />
                   <Typography
-                    variant="captionSm"
+                    variant="caption"
                     color={colors.secondaryText}
                     style={styles.category}
                     numberOfLines={1}

@@ -32,6 +32,9 @@ export default function TabLayout() {
           title: "Home",
           headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          headerBackTitleStyle: {
+            fontFamily: "Lexend_700Bold"
+          }
         }}
       />
 
@@ -40,8 +43,10 @@ export default function TabLayout() {
         options={{
           title: "Categories",
           headerShown: false,
-
           tabBarIcon: ({ color }) => <TabBarIcon name="book" color={color} />,
+          headerBackTitleStyle: {
+            fontFamily: "Lexend_700Bold"
+          }
         }}
       />
       <Tabs.Screen
@@ -50,6 +55,9 @@ export default function TabLayout() {
           title: "Profile",
           headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+          headerBackTitleStyle: {
+            fontFamily: "Lexend_700Bold"
+          }
         }}
       />
       <Tabs.Screen

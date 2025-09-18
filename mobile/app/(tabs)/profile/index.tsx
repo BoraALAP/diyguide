@@ -11,6 +11,7 @@ import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
+
 import Auth from "@/components/Auth";
 import ProfileHeader from "@/components/ProfileHeader";
 import ProfileSection from "@/components/ProfileSection";

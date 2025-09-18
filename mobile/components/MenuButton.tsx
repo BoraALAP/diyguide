@@ -30,7 +30,7 @@ const MenuButton: React.FC<MenuButtonProps> = ({
 
   const getColor = () => {
     if (disabled) return colors.disabledText;
-    return variant === "destructive" ? "#a00000" : colors.text;
+    return variant === "destructive" ? colors.error : colors.text;
   };
 
   return (

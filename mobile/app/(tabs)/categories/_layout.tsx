@@ -1,27 +1,25 @@
-import { Slot, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import React from "react";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "react-native";
+import { getDefaultStackOptions } from "@/utils/navigationOptions";
 
 export default function _layout() {
   const colorScheme = useColorScheme();
 
+  const baseStackOptions = getDefaultStackOptions(colorScheme);
+  const stackScreenOptions = {
+    ...baseStackOptions,
+    headerBackButtonMenuEnabled: true,
+  };
+
   return (
-    <Stack>
+    <Stack screenOptions={stackScreenOptions}>
       <Stack.Screen
         name="index"
         options={{
           title: "Categories",
           headerShown: false,
-          headerBlurEffect: "regular",
-          headerShadowVisible: false,
-          headerTransparent: true,
-          headerStyle: {
-            backgroundColor: "rgba(238, 238, 238, 0.15)",
-          },
-          contentStyle: {
-            backgroundColor: Colors[colorScheme ?? "light"].pageBackground,
-          },
         }}
       />
 
@@ -29,15 +27,7 @@ export default function _layout() {
         name="[id]"
         options={({ route }) => ({
           title: (route.params as { title?: string })?.title || "Category",
-          headerBlurEffect: "regular",
-          headerShadowVisible: false,
-          headerTransparent: true,
-          headerStyle: {
-            backgroundColor: "rgba(238, 238, 238, 0.15)",
-          },
-          contentStyle: {
-            backgroundColor: Colors[colorScheme ?? "light"].pageBackground,
-          },
+
         })}
       />
     </Stack>

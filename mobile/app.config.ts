@@ -6,7 +6,7 @@ const getBundleID = () => {
   }
 
   if (process.env.APP_VARIANT === "preview") {
-    return "com.boraalap.diyguide.preview";
+    return "com.boraalap.diyguide";
   }
 
   return "com.boraalap.diyguide";

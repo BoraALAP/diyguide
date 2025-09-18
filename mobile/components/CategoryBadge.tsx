@@ -42,7 +42,6 @@ const CategoryBadge: React.FC<CategoryBadgeProps> = ({
       />
       <Typography
         variant="label"
-        weight="medium"
         color={colors.text}
         numberOfLines={1}
       >

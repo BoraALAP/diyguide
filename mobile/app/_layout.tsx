@@ -42,8 +42,8 @@ import { useEffect } from "react";
 // import "react-native-reanimated";
 
 import { useColorScheme } from "@/components/useColorScheme";
-import Colors from "@/constants/Colors";
 import { SupabaseProvider } from "@/utils/SupabaseProvider";
+import { getDefaultStackOptions } from "@/utils/navigationOptions";
 
 
 export {
@@ -110,6 +110,12 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
+  const baseStackOptions = getDefaultStackOptions(colorScheme);
+  const stackScreenOptions = {
+    ...baseStackOptions,
+    headerBackButtonMenuEnabled: true,
+  };
+
   if (!loaded) {
     return null;
   }
@@ -118,32 +124,18 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <SupabaseProvider>
         {/* <RevenueProvider> */}
-        <Stack screenOptions={{ headerBackButtonMenuEnabled: true }}>
+        <Stack screenOptions={stackScreenOptions}>
           <Stack.Screen
             name="(tabs)"
             options={{
               headerShown: false,
               title: "",
-              contentStyle: {
-                backgroundColor: Colors[colorScheme ?? "light"].background,
-              },
             }}
           />
           <Stack.Screen
             name="[guide]"
             options={({ route }) => ({
               title: (route.params as { title?: string })?.title || "Guide",
-              headerShadowVisible: false,
-              headerTransparent: true,
-              headerBlurEffect: "regular",
-
-              headerStyle: {
-                backgroundColor:
-                  Colors[colorScheme ?? "light"].headerBackground,
-              },
-              contentStyle: {
-                backgroundColor: Colors[colorScheme ?? "light"].background,
-              },
             })}
           />
         </Stack>

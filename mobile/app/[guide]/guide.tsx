@@ -85,7 +85,7 @@ export default function GuidePage() {
     <>
       <Stack.Screen options={headerOptions} />
       <Suspense fallback={<Loading />}>
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
           <ScrollView style={{ paddingTop: insets.top }} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
             {/* Guide Header */}
             <View style={styles.section}>
@@ -154,6 +154,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     gap: 32,
+    paddingBottom: 32,
   },
   section: {
     gap: 16,

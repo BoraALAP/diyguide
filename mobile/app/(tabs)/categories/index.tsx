@@ -93,7 +93,7 @@ export default function CategoriesScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.continer}>
+    <SafeAreaView style={styles.continer} edges={["top", "left", "right"]}>
       <ScrollView
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}
@@ -127,7 +127,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     paddingHorizontal: 16, // px-4 from Figma
-
     rowGap: 16,
   },
 

@@ -241,6 +241,7 @@ export default function GenerateScreen() {
   return (
     <SafeAreaView
       style={[styles.container]}
+      edges={["top", "left", "right"]}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -364,6 +365,7 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     gap: 32,
+    paddingBottom: 32,
   },
   section: {
     gap: 16,

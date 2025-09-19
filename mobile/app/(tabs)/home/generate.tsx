@@ -223,6 +223,19 @@ export default function GenerateScreen() {
     return !(step?.image_url || stepImages[key]);
   });
 
+  const GenerationNotice = () => (
+    <View
+      style={[
+        styles.noticeCard,
+        { backgroundColor: colors.cardBackground },
+      ]}
+    >
+      <Typography variant="body" color={colors.secondaryText}>
+        It might take a few minutes to generate everything completely.
+      </Typography>
+    </View>
+  );
+
   if (!object && !error) {
     return (
       <View
@@ -230,6 +243,7 @@ export default function GenerateScreen() {
           styles.loadingContainer
         ]}
       >
+        <GenerationNotice />
         <ActivityIndicator size="large" color={colors.tint} />
         <Typography variant="body" color={colors.secondaryText}>
           Generating You Guide...
@@ -240,6 +254,7 @@ export default function GenerateScreen() {
 
   return (
     <ScrollPageContainer header>
+      <GenerationNotice />
       {/* Guide Header Section */}
       {object && (
         <View style={styles.section}>
@@ -349,6 +364,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 16,
 
+  },
+  noticeCard: {
+    alignSelf: "stretch",
+    marginHorizontal: 16,
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 12,
   },
   section: {
     gap: 16,

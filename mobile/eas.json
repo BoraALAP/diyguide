@@ -10,9 +10,10 @@
         "EXPO_PUBLIC_SUPABASE_URL": "http://192.168.178.200:54321",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0",
         "EXPO_PUBLIC_API_AUTH_KEY": "8f47e8c1-9b4a-4f8d-b7d5-e89c3f6d2a4e",
-        "EXPO_PUBLIC_BUNDLE_ID": "com.boraalap.diyguide",
-        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_egaQtFczqHTXFRNGnntoTZhplLC",
-        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR"
+        "EXPO_PUBLIC_BUNDLE_ID": "com.barkingcode.diyguide",
+        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_spuNcMRTSEsezkRLcStuNQsCvug",
+        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR",
+        "APP_VARIANT": "development"
       },
       "ios": {
         "simulator": true
@@ -30,9 +31,10 @@
         "EXPO_PUBLIC_SUPABASE_URL": "http://192.168.178.200:54321",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0",
         "EXPO_PUBLIC_API_AUTH_KEY": "8f47e8c1-9b4a-4f8d-b7d5-e89c3f6d2a4e",
-        "EXPO_PUBLIC_BUNDLE_ID": "com.boraalap.diyguide",
-        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_egaQtFczqHTXFRNGnntoTZhplLC",
-        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR"
+        "EXPO_PUBLIC_BUNDLE_ID": "com.barkingcode.diyguide",
+        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_spuNcMRTSEsezkRLcStuNQsCvug",
+        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR",
+        "APP_VARIANT": "development"
       }
     },
     "preview": {
@@ -44,9 +46,10 @@
         "EXPO_PUBLIC_SUPABASE_URL": "https://vixtnqangkibmfnhpily.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpeHRucWFuZ2tpYm1mbmhwaWx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE4MjI3NjcsImV4cCI6MjA0NzM5ODc2N30.XO2dfua_AcZ_CSDACjuiPLvZ8nNVYoMFxIDlcH_YQ0M",
         "EXPO_PUBLIC_API_AUTH_KEY": "8f47e8c1-9b4a-4f8d-b7d5-e89c3f6d2a4e",
-        "EXPO_PUBLIC_BUNDLE_ID": "com.boraalap.diyguide",
-        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_VQnUwsKGzAewRCjpkRWneyLeJTJ",
-        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR"
+        "EXPO_PUBLIC_BUNDLE_ID": "com.barkingcode.diyguide",
+        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_aiwwTVXCHfmJjtouGrRchhpGyEv",
+        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR",
+        "APP_VARIANT": "preview"
       }
     },
     "production": {
@@ -58,9 +61,10 @@
         "EXPO_PUBLIC_SUPABASE_URL": "https://vixtnqangkibmfnhpily.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpeHRucWFuZ2tpYm1mbmhwaWx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE4MjI3NjcsImV4cCI6MjA0NzM5ODc2N30.XO2dfua_AcZ_CSDACjuiPLvZ8nNVYoMFxIDlcH_YQ0M",
         "EXPO_PUBLIC_API_AUTH_KEY": "8f47e8c1-9b4a-4f8d-b7d5-e89c3f6d2a4e",
-        "EXPO_PUBLIC_BUNDLE_ID": "com.boraalap.diyguide",
-        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_VQnUwsKGzAewRCjpkRWneyLeJTJ",
-        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR"
+        "EXPO_PUBLIC_BUNDLE_ID": "com.barkingcode.diyguide",
+        "EXPO_PUBLIC_REVENUE_CAT_IOS": "appl_QnJckhaFYGwGrdzrKneyEiSqChQ",
+        "EXPO_PUBLIC_REVENUE_CAT_ANDROID": "goog_lGwMigQLVaBEBNupcocbkmKJwQR",
+        "APP_VARIANT": "production"
       }
     }
   },

@@ -1,33 +1,49 @@
 import { ConfigContext, ExpoConfig } from "expo/config";
 
-const getBundleID = () => {
-  if (process.env.APP_VARIANT === "production") {
-    return "com.boraalap.diyguide";
-  }
+type AppVariant = "production" | "preview" | "development" | string;
 
-  if (process.env.APP_VARIANT === "preview") {
-    return "com.boraalap.diyguide";
-  }
-
-  return "com.boraalap.diyguide";
+const resolveVariant = (): AppVariant => {
+  const fromEnv = process.env.APP_VARIANT ?? process.env.environment;
+  if (!fromEnv) return "development";
+  return fromEnv.toLowerCase();
 };
 
-const bundleID = getBundleID();
+const appVariant = resolveVariant();
+const bundleBase = process.env.EXPO_PUBLIC_BUNDLE_ID ??
+  "com.barkingcode.diyguide";
 
-const getAppName = () => {
-  if (process.env.APP_VARIANT === "production") {
-    return "DIY Guide";
-  }
-
-  if (process.env.APP_VARIANT === "preview") {
-    return "DIY Guide Preview";
-  }
-
-  return "DIY Guide D";
+const bundleSuffixMap: Record<string, string> = {
+  production: "",
+  preview: ".preview",
+  development: ".dev",
 };
 
-const appName = getAppName();
+const resolveBundleId = () => {
+  const suffix = bundleSuffixMap[appVariant] ?? `.${appVariant}`;
+  if (!suffix) return bundleBase;
+  return `${bundleBase}${suffix}`;
+};
+
+const bundleID = resolveBundleId();
+
+const resolveAppName = () => {
+  const baseName = "DIY Guide";
+  switch (appVariant) {
+    case "production":
+      return baseName;
+    case "preview":
+      return `${baseName} Preview`;
+    default:
+      return `${baseName} Dev`;
+  }
+};
+
+const appName = resolveAppName();
 const appVersion = process.env.APP_VERSION ?? "1.0.1";
+const schemeBase = "com.diyguide";
+const scheme = appVariant === "production"
+  ? schemeBase
+  : `${schemeBase}.${appVariant}`;
 
 export default ({ config }: ConfigContext): ExpoConfig => {
   return {
@@ -37,7 +53,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     version: appVersion,
     orientation: "portrait",
     icon: "./assets/images/icon.png",
-    scheme: "com.diyguide",
+    scheme,
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     splash: {
@@ -83,6 +99,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       eas: {
         projectId: "f4c0f14b-7975-46e8-85ff-1d5a031e2c2f",
       },
+      appVariant,
     },
     // Bare workflow doesn't support runtime policies, so mirror the app version.
     runtimeVersion: appVersion,

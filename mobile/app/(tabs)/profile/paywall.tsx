@@ -1,34 +1,43 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, useColorScheme, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
 
 import { useRevenue } from "@/utils/RevenueProvider";
 import Button from "@/components/Button";
-import Purchases, {
-  PurchasesOfferings,
-  PurchasesPackage,
-} from "react-native-purchases";
+import { PurchasesPackage } from "react-native-purchases";
 import { router } from "expo-router";
 import Colors from "@/constants/Colors";
 
 export default function PaywallScreen() {
   const colorScheme = useColorScheme();
-  const [offerings, setOfferings] = useState<PurchasesOfferings | null>(null);
-  const { loading, purchaseTokens } = useRevenue();
+  const {
+    initializing,
+    loading,
+    offerings,
+    refreshOfferings,
+    restorePurchases,
+    purchaseTokens,
+  } = useRevenue();
   const [selectedPackage, setSelectedPackage] =
     useState<PurchasesPackage | null>(null);
 
   useEffect(() => {
-    const getOfferings = async () => {
-      try {
-        const offerings = await Purchases.getOfferings();
-        setOfferings(offerings);
-      } catch (error) {
-        console.error("Error fetching offerings:", error);
-      }
-    };
+    if (!initializing && !offerings) {
+      refreshOfferings();
+    }
+  }, [initializing, offerings, refreshOfferings]);
 
-    getOfferings();
-  }, []);
+  useEffect(() => {
+    if (!selectedPackage && offerings?.current?.availablePackages.length) {
+      setSelectedPackage(offerings.current.availablePackages[0]);
+    }
+  }, [offerings, selectedPackage]);
 
   const handlePurchase = async () => {
     if (selectedPackage) {
@@ -49,6 +58,7 @@ export default function PaywallScreen() {
     content: {
       flex: 1,
       gap: 24,
+      paddingBottom: 140,
     },
     packageContainer: {
       padding: 16,
@@ -63,12 +73,18 @@ export default function PaywallScreen() {
     },
     buttonContainer: {
       position: "absolute",
+      left: 0,
+      right: 0,
       bottom: 24,
       width: "100%",
+      gap: 12,
     },
   });
 
-  console.log(offerings);
+  const availablePackages = useMemo(
+    () => offerings?.current?.availablePackages ?? [],
+    [offerings]
+  );
 
   return (
     <View style={styles.container}>
@@ -78,27 +94,45 @@ export default function PaywallScreen() {
           Purchase tokens to continue generating amazing content
         </Text>
 
-        {offerings?.current?.availablePackages.map((pkg, index) => (
-          <View
-            key={index}
-            style={[
-              styles.packageContainer,
-              selectedPackage === pkg && styles.selectedPackage,
-            ]}
-            onTouchEnd={() => setSelectedPackage(pkg)}
-          >
-            <Text>{pkg.product.title}</Text>
-            <Text>{pkg.product.description}</Text>
-            <Text>{pkg.product.priceString}</Text>
+        {initializing ? (
+          <ActivityIndicator size="large" />
+        ) : availablePackages.length ? (
+          availablePackages.map((pkg) => (
+            <Pressable
+              key={pkg.identifier}
+              accessibilityRole="button"
+              onPress={() => setSelectedPackage(pkg)}
+              style={[
+                styles.packageContainer,
+                selectedPackage?.identifier === pkg.identifier &&
+                  styles.selectedPackage,
+              ]}
+            >
+              <Text>{pkg.product.title}</Text>
+              <Text>{pkg.product.description}</Text>
+              <Text>{pkg.product.priceString}</Text>
+            </Pressable>
+          ))
+        ) : (
+          <View>
+            <Text>No packages available right now. Try again in a moment.</Text>
           </View>
-        ))}
+        )}
         <View style={styles.buttonContainer}>
           <Button
             onPress={handlePurchase}
             title={loading ? "Processing..." : "Purchase Selected Package"}
             variant="primary"
             size="large"
-            disabled={loading || !selectedPackage}
+            disabled={loading || initializing || !selectedPackage}
+            loading={loading}
+          />
+          <Button
+            onPress={restorePurchases}
+            title="Restore Purchases"
+            variant="secondary"
+            size="large"
+            disabled={loading || initializing}
           />
         </View>
       </View>

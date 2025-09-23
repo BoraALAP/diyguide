@@ -4,7 +4,14 @@
  * should require sign-in before showing content, like the profile tab.
  */
 import React, { useState } from "react";
-import { StyleSheet, View, AppState, Platform, ScrollView, Text } from "react-native";
+import {
+  StyleSheet,
+  View,
+  AppState,
+  Platform,
+  ScrollView,
+  Text,
+} from "react-native";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Updates from "expo-updates";
 import { useForm, Controller } from "react-hook-form";
@@ -38,7 +45,6 @@ export default function Auth() {
     signInWithPassword,
     signUp,
     loading,
-    performOAuth,
     sendMagicLink,
     createSessionFromUrl,
   } = useSupabase();
@@ -72,8 +78,6 @@ export default function Auth() {
   };
 
   const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const [usePassword, setUsePassword] = useState(false);
-
   const onSendMagicLink = async (email: string) => {
     const res = await sendMagicLink(email);
     setMagicLinkSent(res);
@@ -100,106 +104,64 @@ export default function Auth() {
             )}
           />
 
-          {usePassword && (
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label="Password"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  keyboardType="default"
-                  secureTextEntry={true}
-                  placeholder="Password"
-                  autoCapitalize={"none"}
-                  error={errors.password?.message}
-                />
-              )}
-            />
-          )}
-        </View>
-
-        {usePassword && (
-          <View style={styles.topButtons}>
-            <PrimaryButton
-              title="Sign in"
-              onPress={handleSubmit(onSubmit)}
-              disabled={loading || !isFormValid}
-            />
-
-            <PrimaryButton
-              title="Sign up"
-              disabled={loading || !isFormValid}
-              variant="secondary"
-              onPress={handleSubmit((data) =>
-                signUp(data.email, data.password)
-              )}
-            />
-          </View>
-        )}
-
-        {!usePassword && (
-          <View style={styles.bottomButtons}>
-            {magicLinkSent ? (
-              <View style={styles.magicLinkSent}>
-                <Text>Check your email for the magic link.</Text>
-              </View>
-            ) : (
-              <PrimaryButton
-                onPress={async () => {
-                  const email = getValues("email");
-                  if (email) {
-                    await onSendMagicLink(email);
-                  }
-                }}
-                title="Continue with Magic Link"
-                variant="primary"
-                disabled={!emailValue || magicLinkSent}
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label="Password"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                keyboardType="default"
+                secureTextEntry={true}
+                placeholder="Password"
+                autoCapitalize={"none"}
+                error={errors.password?.message}
               />
             )}
-          </View>
-        )}
+          />
+        </View>
+
+        <View style={styles.primaryActions}>
+          <PrimaryButton
+            title="Sign in"
+            onPress={handleSubmit(onSubmit)}
+            disabled={loading || !isFormValid}
+          />
+
+          <PrimaryButton
+            title="Sign up"
+            disabled={loading || !isFormValid}
+            variant="secondary"
+            onPress={handleSubmit((data) => signUp(data.email, data.password))}
+          />
+        </View>
 
         <View style={styles.orContainer}>
           <View style={styles.orLine} />
+          <Text style={styles.orText}>Or</Text>
+          <View style={styles.orLine} />
         </View>
 
-        <View style={styles.bottomButtons}>
-          {usePassword ? (
-            <PrimaryButton
-              onPress={async () => {
-                setUsePassword(false);
-              }}
-              title="Sign In with Magic Link"
-              variant="secondary"
-            />
+        <View style={styles.altActions}>
+          {magicLinkSent ? (
+            <View style={styles.magicLinkSent}>
+              <Text>Check your email for the magic link.</Text>
+            </View>
           ) : (
             <PrimaryButton
               onPress={async () => {
-                setUsePassword(true);
+                const email = getValues("email");
+                if (email) {
+                  await onSendMagicLink(email);
+                }
               }}
-              title="Sign In with Password"
+              title="Continue with Magic Link"
               variant="secondary"
+              disabled={!emailValue || magicLinkSent}
             />
           )}
-        </View>
-
-        <View style={styles.orContainer}>
-          <View style={styles.orLine} />
-          <Text style={styles.orText}>
-            Or
-          </Text>
-          <View style={styles.orLine} />
-        </View>
-
-        <View style={styles.bottomButtons}>
-          <PrimaryButton
-            onPress={() => performOAuth("github")}
-            title="Sign in with Github"
-            variant="tertiary"
-          />
 
           {Platform.OS === "ios" && (
             <AppleAuthentication.AppleAuthenticationButton
@@ -274,13 +236,15 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     gap: 16,
   },
-  topButtons: {
+  primaryActions: {
     flexDirection: "column",
     gap: 12,
+    marginTop: 24,
   },
-  bottomButtons: {
+  altActions: {
     gap: 16,
     justifyContent: "center",
+    marginTop: 24,
   },
   appleButton: {
     width: "100%",

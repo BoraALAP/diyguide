@@ -1,17 +1,26 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Alert, Platform } from "react-native";
 import Purchases, {
   CustomerInfo,
+  PurchasesOfferings,
   PurchasesPackage,
 } from "react-native-purchases";
 import { useSupabase } from "./SupabaseProvider";
 
 interface RevenueContextType {
+  initializing: boolean;
   loading: boolean;
-  // subscribed: boolean;
   customerInfo: CustomerInfo | undefined;
-  // checkPaywall: () => Promise<boolean | undefined>;
-  // display: () => Promise<void>;
+  offerings: PurchasesOfferings | null;
+  refreshOfferings: () => Promise<void>;
+  restorePurchases: () => Promise<boolean>;
   purchaseTokens: (pack: PurchasesPackage) => Promise<boolean>;
 }
 
@@ -20,11 +29,33 @@ const RevenueContext = createContext<RevenueContextType | undefined>(undefined);
 export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { updateProfile } = useSupabase();
+  const { session, updateProfile } = useSupabase();
+  const [initializing, setInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
-  // const [subscribed, setSubscribed] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>();
-  const [offerings, setOfferings] = useState<PurchasesPackage[] | null>(null);
+  const [offerings, setOfferings] = useState<PurchasesOfferings | null>(null);
+  const [isConfigured, setIsConfigured] = useState(false);
+
+  const tokenRewards = useMemo(
+    () => ({
+      ten_token: 10,
+      ios_ten_tokens: 10,
+      android_ten_tokens: 10,
+      hundred_token: 100,
+      ios_hundred_tokens: 100,
+      android_hundred_tokens: 100,
+    }),
+    []
+  );
+
+  const loadOfferings = useCallback(async () => {
+    try {
+      const offeringsResult = await Purchases.getOfferings();
+      setOfferings(offeringsResult);
+    } catch (error) {
+      console.error("Error loading offerings", error);
+    }
+  }, []);
 
   useEffect(() => {
     const setup = async () => {
@@ -34,59 +65,81 @@ export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
           : (process.env.EXPO_PUBLIC_REVENUE_CAT_IOS as string);
 
       try {
+        setInitializing(true);
+        if (!apiKey) {
+          console.warn("RevenueCat API key is not configured for this platform");
+          return;
+        }
         await Purchases.configure({
           apiKey: apiKey,
         });
+        setIsConfigured(true);
 
         Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
-        Purchases.addCustomerInfoUpdateListener((customerInfo) => {
+        const listener = Purchases.addCustomerInfoUpdateListener((customerInfo) => {
           setCustomerInfo(customerInfo);
         });
-        // await checkSubscriptionStatus();
+
+        const info = await Purchases.getCustomerInfo();
+        setCustomerInfo(info);
         await loadOfferings();
+
+        return () => {
+          Purchases.removeCustomerInfoUpdateListener(listener);
+        };
       } catch (error) {
         console.error("RevenueCat setup error", error);
       }
     };
 
-    setup().catch((error) => console.error("RevenueCat setup error", error));
-  }, []);
+    let cleanup: (() => void) | undefined;
+    setup()
+      .then((result) => {
+        cleanup = result || undefined;
+      })
+      .catch((error) => console.error("RevenueCat setup error", error))
+      .finally(() => setInitializing(false));
 
-  const loadOfferings = async () => {
-    const offerings = await Purchases.getOfferings();
-    const currentOfferings = offerings.current;
-    if (currentOfferings) {
-      setOfferings(currentOfferings.availablePackages);
-    }
-  };
+    return () => {
+      cleanup?.();
+    };
+  }, [loadOfferings]);
 
-  // const checkSubscriptionStatus = async () => {
-  //   try {
-  //     const customerInfo = await Purchases.getCustomerInfo();
-  //     setCustomerInfo(customerInfo);
-  //   } catch (error) {
-  //     console.error("Error fetching customer info", error);
-  //   }
-  // };
+  const userId = session?.user?.id;
+
+  useEffect(() => {
+    if (!isConfigured) return;
+
+    const syncUser = async () => {
+      try {
+        if (userId) {
+          const { customerInfo: info } = await Purchases.logIn(userId);
+          setCustomerInfo(info);
+        } else {
+          await Purchases.logOut();
+          setCustomerInfo(undefined);
+        }
+      } catch (error) {
+        console.error("RevenueCat auth sync error", error);
+      }
+    };
+
+    syncUser();
+  }, [isConfigured, userId]);
 
   const purchaseTokens = async (pack: PurchasesPackage) => {
     setLoading(true);
     try {
-      await Purchases.purchasePackage(pack);
+      const { customerInfo: updatedCustomerInfo } =
+        await Purchases.purchasePackage(pack);
 
-      if (
-        pack.product.identifier === "ten_token" ||
-        pack.product.identifier === "ios_ten_tokens" ||
-        pack.product.identifier === "android_ten_tokens"
-      ) {
-        updateProfile({ tokens: 10 });
-      } else if (
-        pack.product.identifier === "hundred_token" ||
-        pack.product.identifier === "ios_hundred_tokens" ||
-        pack.product.identifier === "android_hundred_tokens"
-      ) {
-        updateProfile({ tokens: 100 });
+      setCustomerInfo(updatedCustomerInfo);
+
+      const reward = tokenRewards[pack.product.identifier];
+      if (reward) {
+        await updateProfile({ tokens: reward });
       }
+      await loadOfferings();
       return true;
     } catch (error) {
       console.error("Error purchasing tokens", error);
@@ -100,67 +153,34 @@ export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // const display = async () => {
-  //   console.log("display");
-  //   try {
-  //     const offerings = await Purchases.getOfferings();
-  //     console.log("offerings", offerings);
-
-  //     if (offerings.current !== null) {
-  //       const paywallResult: PAYWALL_RESULT = await RevenueCatUI.presentPaywall(
-  //         {
-  //           offering: offerings.current,
-  //           displayCloseButton: true,
-  //         }
-  //       );
-  //       if (paywallResult === PAYWALL_RESULT.PURCHASED) {
-  //         console.log(customerInfo);
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error("Error displaying paywall", error);
-  //   }
-  // };
-
-  // const checkPaywall = async () => {
-  //   console.log("checkPaywall");
-  //   setLoading(true);
-  //   try {
-  //     const paywallResult: PAYWALL_RESULT =
-  //       await RevenueCatUI.presentPaywallIfNeeded({
-  //         requiredEntitlementIdentifier: "pro",
-  //       });
-
-  //     switch (paywallResult) {
-  //       case PAYWALL_RESULT.PURCHASED:
-  //       case PAYWALL_RESULT.RESTORED:
-  //       case PAYWALL_RESULT.NOT_PRESENTED:
-  //         setSubscribed(true);
-  //         await checkSubscriptionStatus();
-  //         return true;
-  //       case PAYWALL_RESULT.CANCELLED:
-  //       case PAYWALL_RESULT.ERROR:
-  //         setSubscribed(false);
-  //         return false;
-  //       default:
-  //         setSubscribed(false);
-  //         return false;
-  //     }
-  //   } catch (error) {
-  //     console.error("Error checking paywall", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const restorePurchases = async () => {
+    setLoading(true);
+    try {
+      const restoredCustomerInfo = await Purchases.restorePurchases();
+      setCustomerInfo(restoredCustomerInfo);
+      await loadOfferings();
+      return true;
+    } catch (error) {
+      console.error("Error restoring purchases", error);
+      Alert.alert(
+        "We couldn't restore purchases",
+        "Double-check that you're signed in with the same account and try again."
+      );
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <RevenueContext.Provider
       value={{
+        initializing,
         loading,
-        // subscribed,
         customerInfo,
-        // checkPaywall,
-        // display,
+        offerings,
+        refreshOfferings: loadOfferings,
+        restorePurchases,
         purchaseTokens,
       }}
     >

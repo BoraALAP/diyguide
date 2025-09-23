@@ -43,6 +43,7 @@ import { useEffect } from "react";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import { SupabaseProvider } from "@/utils/SupabaseProvider";
+import { RevenueProvider } from "@/utils/RevenueProvider";
 import { getDefaultStackOptions } from "@/utils/navigationOptions";
 
 
@@ -123,23 +124,23 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <SupabaseProvider>
-        {/* <RevenueProvider> */}
-        <Stack screenOptions={stackScreenOptions}>
-          <Stack.Screen
-            name="(tabs)"
-            options={{
-              headerShown: false,
-              title: "",
-            }}
-          />
-          <Stack.Screen
-            name="[guide]"
-            options={({ route }) => ({
-              title: (route.params as { title?: string })?.title || "Guide",
-            })}
-          />
-        </Stack>
-        {/* </RevenueProvider> */}
+        <RevenueProvider>
+          <Stack screenOptions={stackScreenOptions}>
+            <Stack.Screen
+              name="(tabs)"
+              options={{
+                headerShown: false,
+                title: "",
+              }}
+            />
+            <Stack.Screen
+              name="[guide]"
+              options={({ route }) => ({
+                title: (route.params as { title?: string })?.title || "Guide",
+              })}
+            />
+          </Stack>
+        </RevenueProvider>
       </SupabaseProvider>
     </ThemeProvider>
   );

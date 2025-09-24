@@ -21,6 +21,7 @@ const GuideSchema = z.object({
   materials: z.array(z.string()),
   tags: z.array(z.string()),
   tips: z.array(z.string()),
+  thumbnail_prompt: z.string().optional(),
 });
 
 // Support both OPENAI_API_KEY and OPENAI_KEY for flexibility
@@ -131,7 +132,7 @@ serve(async (req: Request) => {
           content:
             `You are a specialist on writing a do it your self guides. You are given a topic and you need to write a detailed guide for it. You need to provide steps and tips. Include a list of materials and tools needed with their measurements for each step and for the whole guide. additionally, give tags for the guide, please avoid tags like diy and please put space between words. For the title, please don't say "How to ...". Keep it short and to the point. Include tags for the guide. Use existing tags where applicable: ${
               Object.keys(existingTagMap).join(", ")
-            }. Return a single JSON object with keys: title, content, steps (array of {step:number, description:string, materials:string[], tools:string[]}), tools (string[]), materials (string[]), tags (string[]), tips (string[]). Respond with ONLY valid JSON. Do not include backticks or any non-JSON text.`,
+            }. Return a single JSON object with keys: title, content, steps (array of {step:number, description:string, materials:string[], tools:string[]}), tools (string[]), materials (string[]), tags (string[]), tips (string[]), thumbnail_prompt (string). The thumbnail_prompt must describe a single hero image of the finished project, highlight key materials, use clean studio lighting, and explicitly forbid any text, labels, or watermarks. Respond with ONLY valid JSON. Do not include backticks or any non-JSON text.`,
         },
         {
           role: "user",
@@ -174,6 +175,17 @@ serve(async (req: Request) => {
       throw new Error("AI response failed schema validation");
     }
     content = parsed.data;
+
+    const openAiThumbnailPrompt = content.thumbnail_prompt?.trim();
+    const materialsPreview = Array.isArray(content.materials)
+      ? content.materials.filter(Boolean).slice(0, 3).join(", ")
+      : "versatile DIY materials";
+    const fallbackThumbnailPrompt = `Photo-realistic hero image of the finished project \"${content.title}\". Highlight key materials (${materialsPreview || "common household tools"}), use clean neutral background, soft natural lighting, no hands, people, or overlaid text.`;
+    const usedThumbnailPrompt = openAiThumbnailPrompt && openAiThumbnailPrompt.length > 0
+      ? openAiThumbnailPrompt
+      : fallbackThumbnailPrompt;
+    content.thumbnail_prompt = usedThumbnailPrompt;
+    let guideThumbnailUrl: string | null = null;
 
     // Optionally generate step images with Gemini and upload to Supabase Storage
     if (enableImageGen && geminiApiKey && supabaseServiceClient) {
@@ -219,6 +231,54 @@ Output: single PNG image.`;
         if (!b64) throw new Error("Gemini response missing image data");
         return b64ToBytes(b64);
       };
+
+      if (usedThumbnailPrompt) {
+        try {
+          const bytes = await generateImage(usedThumbnailPrompt);
+          const path = `guide-images/${sessionId}/thumbnail.png`;
+          const blob = new Blob([bytes], { type: "image/png" });
+          const { error: thumbErr } = await supabaseServiceClient
+            .storage
+            .from("guide-images")
+            .upload(path.replace(/^guide-images\//, ""), blob, {
+              contentType: "image/png",
+              upsert: true,
+            });
+          if (thumbErr) throw thumbErr;
+          const { data: thumbPub } = supabaseServiceClient
+            .storage
+            .from("guide-images")
+            .getPublicUrl(path.replace(/^guide-images\//, ""));
+          let publicThumbUrl = thumbPub.publicUrl as string;
+          if (publicBaseOverride) {
+            try {
+              const u = new URL(publicThumbUrl);
+              const b = new URL(publicBaseOverride);
+              u.protocol = b.protocol;
+              u.hostname = b.hostname;
+              if (b.port && b.port.length > 0) {
+                u.port = b.port;
+              } else {
+                try {
+                  const envBase = new URL(supabaseUrl);
+                  if (envBase.port) u.port = envBase.port;
+                } catch (_) {
+                  // ignore override errors
+                }
+              }
+              publicThumbUrl = u.toString();
+            } catch (_) {
+              // ignore overrides
+            }
+          }
+          guideThumbnailUrl = publicThumbUrl;
+        } catch (e) {
+          console.log(
+            "Thumbnail generation failed:",
+            (e as any)?.message ?? e,
+          );
+        }
+      }
 
       for (let i = 0; i < content.steps.length; i++) {
         const step = content.steps[i];
@@ -305,9 +365,11 @@ Output: single PNG image.`;
           materials: content.materials,
           created_by: "AI",
           tips: content.tips,
+          thumbnail_prompt: content.thumbnail_prompt,
+          thumbnail_url: guideThumbnailUrl,
         },
       ])
-      .select("id, title, content, steps, tips")
+      .select("id, title, content, steps, tips, thumbnail_url, thumbnail_prompt")
       .single();
 
     if (guideError) throw new Error("Error inserting guide");

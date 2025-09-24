@@ -24,6 +24,7 @@ const GuideSchema = z.object({
   materials: z.array(z.string()),
   tags: z.array(z.string()),
   tips: z.array(z.string()),
+  thumbnail_prompt: z.string().optional(),
 });
 type Guide = z.infer<typeof GuideSchema>;
 type Step = z.infer<typeof StepSchema>;
@@ -132,6 +133,7 @@ serve(async (req) => {
         "Each step includes materials (with measurements) and tools.",
         "Also include overall materials & tools, concise tips, and useful tags.",
         "Do NOT include `image_url` keys in steps. Only include `image_prompt` (optional).",
+        "Include a thumbnail_prompt describing a single photo-realistic hero image of the finished project. Mention key materials or workspace context, require clean lighting, and forbid people, hands, or any overlaid text.",
         tagHint,
         "",
         `Topic: ${query}`,
@@ -145,6 +147,15 @@ serve(async (req) => {
         }
 
         try {
+          const openAiThumbnailPrompt = object.thumbnail_prompt?.trim();
+          const materialsPreview = Array.isArray(object.materials)
+            ? object.materials.filter(Boolean).slice(0, 3).join(", ")
+            : "versatile DIY materials";
+          const fallbackThumbnailPrompt = `Photo-realistic hero image of the finished project \"${object.title}\". Highlight key materials (${materialsPreview || "common household tools"}), clean neutral workspace, bright natural light, no people, no overlaid text.`;
+          object.thumbnail_prompt = openAiThumbnailPrompt && openAiThumbnailPrompt.length > 0
+            ? openAiThumbnailPrompt
+            : fallbackThumbnailPrompt;
+
           // 1) Upsert new tags
           // Normalize candidate tag names (case-insensitive check)
           const newTags = object.tags.filter((t) =>
@@ -241,6 +252,8 @@ serve(async (req) => {
                 tips: object.tips,
                 created_by: createdBy,
                 session_id: sessionId,
+                thumbnail_prompt: object.thumbnail_prompt,
+                thumbnail_url: null,
               }])
               .select("id")
               .single();
@@ -261,6 +274,8 @@ serve(async (req) => {
                   tips: object.tips,
                   created_by: createdBy,
                   session_id: sessionId,
+                  thumbnail_prompt: object.thumbnail_prompt,
+                  thumbnail_url: null,
                 }])
                 .select("id")
                 .single();
@@ -290,12 +305,50 @@ serve(async (req) => {
             const bucket = svc.storage.from("guide-images");
             const folder = crypto.randomUUID();
 
+            let thumbnailUrl: string | null = null;
+
             const mkPrompt = (s: Step) =>
               `Create a clear, instructional illustration for this DIY step.
 Step: ${s.description}
 Materials: ${s.materials?.join(", ") || "none"}
 Tools: ${s.tools?.join(", ") || "none"}
 Style: clean, minimal, neutral background, high-contrast, no text. Output: PNG.`;
+
+            if (object.thumbnail_prompt) {
+              try {
+                const bytes = await genGeminiPng(object.thumbnail_prompt);
+                const storagePath =
+                  `guide-images/${folder}/guide-${guideId}-thumbnail.png`
+                    .replace(
+                      /^guide-images\//,
+                      "",
+                    );
+                const { error: thumbErr } = await bucket.upload(
+                  storagePath,
+                  new Blob([bytes], { type: "image/png" }),
+                  { upsert: true, contentType: "image/png" },
+                );
+                if (thumbErr) throw thumbErr;
+
+                const { data: thumbPub } = bucket.getPublicUrl(storagePath);
+                let url = thumbPub.publicUrl as string;
+                if (PUBLIC_SUPABASE_URL) {
+                  try {
+                    const u = new URL(url), b = new URL(PUBLIC_SUPABASE_URL);
+                    u.protocol = b.protocol;
+                    u.hostname = b.hostname;
+                    if (b.port) u.port = b.port;
+                    url = u.toString();
+                  } catch {}
+                }
+                thumbnailUrl = url;
+              } catch (e) {
+                console.log(
+                  "Thumbnail image generation failed:",
+                  (e as any)?.message ?? e,
+                );
+              }
+            }
 
             const updated: Step[] = [];
             for (const s of object.steps) {
@@ -342,7 +395,11 @@ Style: clean, minimal, neutral background, high-contrast, no text. Output: PNG.`
 
             const { error: patchErr } = await svc
               .from("guides")
-              .update({ steps: updated })
+              .update({
+                steps: updated,
+                thumbnail_url: thumbnailUrl,
+                thumbnail_prompt: object.thumbnail_prompt,
+              })
               .eq("id", guideId);
             if (patchErr) {
               console.error("Patch steps with images failed:", patchErr);

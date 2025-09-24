@@ -1,7 +1,7 @@
 // app/generate.tsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View, StyleSheet, useColorScheme, ActivityIndicator, Pressable } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { fetch as expoFetch } from "expo/fetch";
 import * as Crypto from "expo-crypto";
@@ -73,7 +73,7 @@ export default function GenerateScreen() {
   const colors = Colors[colorScheme];
 
   const { topic } = useLocalSearchParams<{ topic?: string }>();
-  const { removeToken } = useSupabase();
+  const { removeToken, profile } = useSupabase();
 
   const [navigated, setNavigated] = useState(false);
   const [guideId, setGuideId] = useState<number | null>(null);
@@ -102,6 +102,13 @@ export default function GenerateScreen() {
       return changed ? next : prev;
     });
   }, []);
+
+  // Redirect users without tokens to the paywall and prevent generation.
+  useEffect(() => {
+    if (!profile || (profile.tokens ?? 0) <= 0) {
+      router.replace("/profile/paywall");
+    }
+  }, [profile]);
 
   // Get the user's access token so the Edge Function can apply RLS as the user.
   useEffect(() => {
@@ -208,8 +215,9 @@ export default function GenerateScreen() {
   useEffect(() => {
     const q = (topic ?? "").trim();
     if (!q || !authHeader) return;
+    if (!profile || (profile.tokens ?? 0) <= 0) return;
     submit({ query: q, sessionId: sessionIdRef.current } as any);
-  }, [topic, authHeader]);
+  }, [topic, authHeader, profile]);
 
   // Format tags for GuideHeader categories
   const categories = object?.tags?.filter((tag): tag is string => !!tag).map((tag: string) => ({

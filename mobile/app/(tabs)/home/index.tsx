@@ -158,6 +158,11 @@ export default function HomeScreen() {
   };
 
   const handleGenerate = (text?: string) => {
+    if (!profile || (profile.tokens ?? 0) <= 0) {
+      router.push("/profile/paywall");
+      return;
+    }
+
     const query = (text ?? searchQuery).trim();
     if (query) {
       router.push({ pathname: "/home/generate", params: { topic: query } });

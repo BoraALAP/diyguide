@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -7,12 +7,14 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-
-import { useRevenue } from "@/utils/RevenueProvider";
-import Button from "@/components/Button";
-import { PurchasesPackage } from "react-native-purchases";
 import { router } from "expo-router";
+import RevenueCatUI from "react-native-purchases-ui";
+import { PurchasesPackage } from "react-native-purchases";
+import type { PurchasesStoreTransaction } from "@revenuecat/purchases-typescript-internal";
+
+import Button from "@/components/Button";
 import Colors from "@/constants/Colors";
+import { useRevenue } from "@/utils/RevenueProvider";
 
 export default function PaywallScreen() {
   const colorScheme = useColorScheme();
@@ -23,13 +25,16 @@ export default function PaywallScreen() {
     refreshOfferings,
     restorePurchases,
     purchaseTokens,
+    creditTokensForProduct,
   } = useRevenue();
+
   const [selectedPackage, setSelectedPackage] =
     useState<PurchasesPackage | null>(null);
+  const [useFallbackPaywall, setUseFallbackPaywall] = useState(false);
 
   useEffect(() => {
     if (!initializing && !offerings) {
-      refreshOfferings();
+      refreshOfferings().catch(() => setUseFallbackPaywall(true));
     }
   }, [initializing, offerings, refreshOfferings]);
 
@@ -39,18 +44,49 @@ export default function PaywallScreen() {
     }
   }, [offerings, selectedPackage]);
 
-  const handlePurchase = async () => {
-    if (selectedPackage) {
-      const result = await purchaseTokens(selectedPackage);
-      if (result) {
-        router.back();
+  const handleDismiss = useCallback(() => {
+    router.back();
+  }, []);
+
+  const handleRevenueCatPurchase = useCallback(
+    async ({
+      storeTransaction,
+    }: {
+      storeTransaction: PurchasesStoreTransaction;
+    }) => {
+      const productId = storeTransaction?.productIdentifier;
+      if (productId) {
+        await creditTokensForProduct(productId);
       }
-    } else {
+      handleDismiss();
+    },
+    [creditTokensForProduct, handleDismiss]
+  );
+
+  const handleRevenueCatRestore = useCallback(async (_event?: unknown) => {
+    await refreshOfferings();
+  }, [refreshOfferings]);
+
+  const handleRevenueCatError = useCallback((_event?: unknown) => {
+    setUseFallbackPaywall(true);
+  }, []);
+
+  const handlePurchase = async () => {
+    if (!selectedPackage) {
       console.log("No package selected");
+      return;
+    }
+
+    const result = await purchaseTokens(selectedPackage);
+    if (result) {
+      router.back();
     }
   };
 
   const styles = StyleSheet.create({
+    fullScreen: {
+      flex: 1,
+    },
     container: {
       flex: 1,
       padding: 24,
@@ -86,13 +122,27 @@ export default function PaywallScreen() {
     [offerings]
   );
 
+  if (!useFallbackPaywall) {
+    return (
+      <View style={styles.fullScreen}>
+        <RevenueCatUI.Paywall
+          style={styles.fullScreen}
+          options={{ offering: offerings?.current ?? undefined }}
+          onDismiss={handleDismiss}
+          onPurchaseCompleted={handleRevenueCatPurchase}
+          onPurchaseError={handleRevenueCatError}
+          onRestoreCompleted={handleRevenueCatRestore}
+          onRestoreError={handleRevenueCatError}
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         <Text>Get More Tokens</Text>
-        <Text>
-          Purchase tokens to continue generating amazing content
-        </Text>
+        <Text>Purchase tokens to continue generating amazing content</Text>
 
         {initializing ? (
           <ActivityIndicator size="large" />

@@ -22,6 +22,7 @@ interface RevenueContextType {
   refreshOfferings: () => Promise<void>;
   restorePurchases: () => Promise<boolean>;
   purchaseTokens: (pack: PurchasesPackage) => Promise<boolean>;
+  creditTokensForProduct: (productId: string) => Promise<boolean>;
 }
 
 const RevenueContext = createContext<RevenueContextType | undefined>(undefined);
@@ -127,6 +128,23 @@ export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
     syncUser();
   }, [isConfigured, userId]);
 
+  const applyTokenReward = useCallback(
+    async (productId: string) => {
+      const reward = tokenRewards[productId];
+      if (!reward) {
+        console.warn(
+          `No token reward configured for product identifier: ${productId}`
+        );
+        return false;
+      }
+
+      await updateProfile({ tokens: reward });
+      await loadOfferings();
+      return true;
+    },
+    [loadOfferings, tokenRewards, updateProfile]
+  );
+
   const purchaseTokens = async (pack: PurchasesPackage) => {
     setLoading(true);
     try {
@@ -134,12 +152,7 @@ export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
         await Purchases.purchasePackage(pack);
 
       setCustomerInfo(updatedCustomerInfo);
-
-      const reward = tokenRewards[pack.product.identifier];
-      if (reward) {
-        await updateProfile({ tokens: reward });
-      }
-      await loadOfferings();
+      await applyTokenReward(pack.product.identifier);
       return true;
     } catch (error) {
       console.error("Error purchasing tokens", error);
@@ -182,6 +195,7 @@ export const RevenueProvider: React.FC<{ children: React.ReactNode }> = ({
         refreshOfferings: loadOfferings,
         restorePurchases,
         purchaseTokens,
+        creditTokensForProduct: applyTokenReward,
       }}
     >
       {children}
